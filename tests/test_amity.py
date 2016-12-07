@@ -8,28 +8,28 @@ class TestAmity(unittest.TestCase):
         self.amity  = Amity ()
         self.room = Room('vanhala')
 
-    def test_room(self):
-        self.assertIsInstance(self.room, Room, 'room is not an object')
+    def test_create_office(self):
+        # test number of rooms in amity and rooms created
+        self.amity.create_room('hogwarts-o', 'vanhala-o' 'ruby-l')
+        self.assertEqual('hogwarts', self.amity.offices.[0].name, 'Room names dont match')
 
-    def test_amity(self):
-        self.assertIsInstance(self.amity, Amity)
+        office_names = [room.name for room in self.amity.offices]
+        self.assertListEqual(['hogwarts', 'vanhala', 'ruby'], office_names , 'offices dont match')
+        self.assertNotEqual('php', office_names[0], 'No office called php')
 
-    def test_create_room(self):
-        room = self.amity.create_room('hogwarts', 'vanhala')
-        self.assertEqual('hogwarts', self.amity.rooms[0].name, 'Room names dont match')
+    def test_create_living(self):
+        # test number of rooms in amity and rooms created
+        self.amity.create_room('java-l', 'ruby-l', 'python-l')
+        self.assertEqual(3, self.amity.living_spaces, 'does not match')
+        living_spaces_names = [room.name for room in self.amity.living_spaces]
+        self.assertListEqual(['ruby', 'python', 'java'], living_spaces_names , 'rooms dont match')
+        self.assertNotEqual('hogwarts', living_spaces_names[1], 'No living room called hogwarts')
 
-    def test_no_of_rooms(self):
-        self.amity.create_room('php', 'ruby', 'python', 'java')
-        no_of_rooms = self.amity.no_of_rooms()
-        self.assertEqual(4, no_of_rooms, 'Error does not match')
 
-    def test_add_fellow(self):
+    def test_add_person(self):
         fellow = self.amity.add_person('arya', 'stark', 'FELLOW', 'female')
         staff = self.amity.add_person('king', 'lanister', 'STAFF', 'male')
         self.assertIsInstance(fellow, Fellow, 'message')
         self.assertIsInstance(staff, Staff, 'message')
-
-    def test_list_rooms(self):
-        rooms = self.amity.create_room('hogwarts', 'vanhala', 'lime')
-        room_names = [room.name for room in self.amity.rooms]
-        self.assertEqual(['hogwarts', 'vanhala', 'lime'], room_names , 'rooms dont match')
+        self.assertEqual(1, len(self.amity.fellows), 'One fellow added only')
+        self.assertEqual(1, len(self.amity.staffs), 'One staff added only')
