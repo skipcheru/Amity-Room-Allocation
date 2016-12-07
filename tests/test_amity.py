@@ -18,7 +18,7 @@ class TestAmity(unittest.TestCase):
         room = self.amity.create_room('hogwarts', 'vanhala')
         self.assertEqual('hogwarts', self.amity.rooms[0].name, 'Room names dont match')
 
-    def test_list_of_rooms(self):
+    def test_no_of_rooms(self):
         self.amity.create_room('php', 'ruby', 'python', 'java')
         no_of_rooms = self.amity.no_of_rooms()
         self.assertEqual(4, no_of_rooms, 'Error does not match')
@@ -28,3 +28,8 @@ class TestAmity(unittest.TestCase):
         staff = self.amity.add_person('king', 'lanister', 'STAFF', 'male')
         self.assertIsInstance(fellow, Fellow, 'message')
         self.assertIsInstance(staff, Staff, 'message')
+
+    def test_list_rooms(self):
+        rooms = self.amity.create_room('hogwarts', 'vanhala', 'lime')
+        room_names = [room.name for room in self.amity.rooms]
+        self.assertEqual(['hogwarts', 'vanhala', 'lime'], room_names , 'rooms dont match')
