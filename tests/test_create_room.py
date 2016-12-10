@@ -6,14 +6,6 @@ class TestCreateRoom(unittest.TestCase):
     """docstring for TestRoom."""
     def setUp(self):
         self.amity  = Amity ()
-        office = ['nania', 'hogwarts', 'oculus']
-        # check if  error raised if room names are not all strings
-        # check if error raised if an office exists on the system with the same name
-        # check if the offices added
-        # check if livingspaces added
-        # check the no of offices and livingspaces are equal.
-        # check if the list of offices contains only objects of type Office ***
-        # check if the list of living spaces contains objects of type LivingSpace ***
 
     # test if room has been added to the system
     def test_error_raised(self):
