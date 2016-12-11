@@ -13,18 +13,6 @@ class TestAddPerson(unittest.TestCase):
         self.fellow4 = Fellow('amina', 'abdi', 'female')
         self.staff1 = Staff('carol', 'radul', 'female')
 
-
-            # check if error raised if person details are all not strings or is null or incomplete
-            # check if the person added to the system is a fellow if person type is fellow
-            # check if the person added to the system is a staff if person type is staff
-            # check if the fellow who wants accommodation is allocated a room
-            # check if both the fellow and staff are allocated offices
-            # check if male fellows who wants accommodation are allocated only male livingspaces
-            # check if female fellows who wants accommodation are allocated only female livingspaces
-            # check if the list of fellows has the fellow been added ?
-            # check if the list of staff has the staff been added ?
-            # check if person has been moved to unallocated if all rooms are full or no room
-
     #check if error raised if person details arenot strings or is null or incomplete
     def test_error_raised(self):
         self.assertRaises(TypeError, self.amity.add_person(), "error should be raised")
