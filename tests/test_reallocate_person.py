@@ -28,7 +28,6 @@ class TestReallocatePerson(unittest.TestCase):
         self.amity.create_room('nania-o', 'peri-l-m', 'oculus-o', 'swift-l-f')
         self.amity.add_person('carol', 'radul', 'staff', 'female')
         reallocate_staff = self.amity.reallocate_person('S001', 'peri')
-
         self.assertEqual('staff cannot be reallocated to living room', reallocate_staff)
 
     # check if the person above is not reallocated to the specified room

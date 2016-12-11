@@ -31,23 +31,24 @@ class TestAddPerson(unittest.TestCase):
     # check if the person is allocated a office
     def test_added_fellow_and_staff_are_allocated_office(self):
         self.amity.create_room('oculus-o')
-        staff = Staff('carol', 'radul', 'staff', 'female')
+        staff = Staff('carol', 'radul', 'female')
         fellow = Fellow('sam', 'cheru', 'male')
-        self.assertEqual(staff, self.amity.offices[1], 'fellow assigned room')
-        self.assertIn(fellow, self.amity.offices, 'fellow assigned office')
+        self.assertEqual(staff, self.amity.offices[1].occupants[1], 'staff assigned room')
+        self.assertIn(fellow, self.amity.offices[1].occupants[0], 'fellow assigned office')
 
     # check if male fellows are allocated only male livingspaces
     def test_only_male_fellow_allocated_male_living_space(self):
+        self.amity.create_room('java-l-m', 'swift-l-f')
         self.amity.add_person('jones', 'mbabe', 'fellow', 'male', 'Y')
         same_fellow = Fellow('jones', 'mbabe', 'male')
-        self.assertIn(same_fellow, self.amity.male_living_spaces, 'fellow allocated only male room')
-        self.assertFalse(same_fellow in self.amity.female_living_spaces, 'confirm fellow allocated only male room')
+        self.assertIn(same_fellow, self.amity.male_living_spaces[0].occupants, 'fellow allocated only male room')
+        self.assertFalse(same_fellow in self.amity.female_living_spaces[0].occupants, 'confirm fellow allocated only male room')
 
     # test if fellow who does not need accommodation are not allocated living rooms
     def test_fellow_who_doesnt_want_accommodation(self):
         self.amity.add_person('ian', 'oti', 'fellow', 'male', 'N')
         fellow_no_living = Fellow('ian', 'oti', 'male')
-        self.assertFalse(fellow_no_living in self.amity.male_living_spaces, 'fellow not allocated livingspace')
+        self.assertFalse(fellow_no_living in self.amity.male_living_spaces[0].occupants, 'fellow not allocated livingspace')
 
     # check if the list of fellows has all the fellow added
     def test_no_of_fellows_added(self):
