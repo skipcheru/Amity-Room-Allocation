@@ -7,11 +7,11 @@ class TestAddPerson(unittest.TestCase):
     """docstring for TestAddPerson."""
     def setUp(self):
         self.amity = Amity()
-        self.fellow1 = Fellow('sam', 'cheru', 'fellow', 'male', 'N')
-        self.fellow2 = Fellow('ian', 'oti', 'fellow', 'male', 'N')
-        self.fellow3 = Fellow('jones', 'mbabe', 'fellow', 'male', 'Y')
-        self.fellow4 = Fellow('amina', 'abdi', 'fellow', 'female', 'Y')
-        self.staff1 = Staff('carol', 'radul', 'staff', 'female')
+        self.fellow1 = Fellow('sam', 'cheru', 'male')
+        self.fellow2 = Fellow('ian', 'oti', 'male')
+        self.fellow3 = Fellow('jones', 'mbabe', 'male')
+        self.fellow4 = Fellow('amina', 'abdi', 'female')
+        self.staff1 = Staff('carol', 'radul', 'female')
 
 
             # check if error raised if person details are all not strings or is null or incomplete
@@ -44,21 +44,21 @@ class TestAddPerson(unittest.TestCase):
     def test_added_fellow_and_staff_are_allocated_office(self):
         self.amity.create_room('oculus-o')
         staff = Staff('carol', 'radul', 'staff', 'female')
-        fellow = Fellow('sam', 'cheru', 'fellow', 'male', 'N')
+        fellow = Fellow('sam', 'cheru', 'male')
         self.assertEqual(staff, self.amity.offices[1], 'fellow assigned room')
         self.assertIn(fellow, self.amity.offices, 'fellow assigned office')
 
     # check if male fellows are allocated only male livingspaces
     def test_only_male_fellow_allocated_male_living_space(self):
         self.amity.add_person('jones', 'mbabe', 'fellow', 'male', 'Y')
-        same_fellow = Fellow('jones', 'mbabe', 'fellow', 'male', 'Y')
+        same_fellow = Fellow('jones', 'mbabe', 'male')
         self.assertIn(same_fellow, self.amity.male_living_spaces, 'fellow allocated only male room')
         self.assertFalse(same_fellow in self.amity.female_living_spaces, 'confirm fellow allocated only male room')
 
     # test if fellow who does not need accommodation are not allocated living rooms
     def test_fellow_who_doesnt_want_accommodation(self):
         self.amity.add_person('ian', 'oti', 'fellow', 'male', 'N')
-        fellow_no_living = Fellow('ian', 'oti', 'fellow', 'male', 'N')
+        fellow_no_living = Fellow('ian', 'oti', 'male')
         self.assertFalse(fellow_no_living in self.amity.male_living_spaces, 'fellow not allocated livingspace')
 
     # check if the list of fellows has all the fellow added
