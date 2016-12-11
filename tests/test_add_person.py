@@ -29,7 +29,7 @@ class TestAddPerson(unittest.TestCase):
         self.assertIsInstance(self.amity.staffs[0]['S001'], Staff)
 
     # check if the person is allocated a office
-    def test_added_fellow_and_staff_are_allocated_office(self):
+    def test_allocate_office_to_fellow_and_staff(self):
         self.amity.create_room('oculus-o')
         staff = Staff('carol', 'radul', 'female')
         fellow = Fellow('sam', 'cheru', 'male')
@@ -37,7 +37,7 @@ class TestAddPerson(unittest.TestCase):
         self.assertIn(fellow, self.amity.offices[1].occupants[0], 'fellow assigned office')
 
     # check if male fellows are allocated only male livingspaces
-    def test_only_male_fellow_allocated_male_living_space(self):
+    def test_allocate_male_fellow_male_living_space(self):
         self.amity.create_room('java-l-m', 'swift-l-f')
         self.amity.add_person('jones', 'mbabe', 'fellow', 'male', 'Y')
         same_fellow = Fellow('jones', 'mbabe', 'male')
@@ -45,7 +45,7 @@ class TestAddPerson(unittest.TestCase):
         self.assertFalse(same_fellow in self.amity.female_living_spaces[0].occupants, 'confirm fellow allocated only male room')
 
     # test if fellow who does not need accommodation are not allocated living rooms
-    def test_fellow_who_doesnt_want_accommodation(self):
+    def test_allocate_office_only(self):
         self.amity.add_person('ian', 'oti', 'fellow', 'male', 'N')
         fellow_no_living = Fellow('ian', 'oti', 'male')
         self.assertFalse(fellow_no_living in self.amity.male_living_spaces[0].occupants, 'fellow not allocated livingspace')
@@ -56,11 +56,11 @@ class TestAddPerson(unittest.TestCase):
         self.assertListEqual(added_fellows,  self.amity.fellows, 'list equal')
 
     # check if the list of staff has all the staff added
-    def test_no_of_fellows_added(self):
+    def test_no_of_staffs_added(self):
         added_staffs = [{'S001': self.staff1}, {'S002': self.staff2}]
         self.assertListEqual(added_staffs,  self.amity.staffs, 'list equal')
 
     # check if person has been moved to unallocated if all rooms are full or no room
-    def test_person_in_unallocated_list(self):
+    def test_unallocated_people(self):
         self.amity.add_person('amina', 'abdi', 'fellow', 'female', 'Y')
         self.assertTrue(self.fellow4 in self.amity.andelans_unallocated_offices, 'fellow in waiting list')
