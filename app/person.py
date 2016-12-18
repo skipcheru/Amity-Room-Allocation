@@ -1,7 +1,10 @@
 
-""" Amity model"""
+""" Amity models"""
+
+
 class Person(object):
     """docstring for Person."""
+
     def __init__(self, first_name, last_name, gender):
         self.first_name = first_name
         self.last_name = last_name
@@ -10,8 +13,10 @@ class Person(object):
     def __str__(self):
         return '{} {}'.format(self.first_name, self.last_name)
 
+
 class Fellow(Person):
     """docstring for Fellow."""
+
     def __init__(self, *args, **kwargs):
         super(Fellow, self).__init__(*args, **kwargs)
         self.person_type = 'FELLOW'
@@ -31,8 +36,10 @@ class Fellow(Person):
     def details(self):
         return '{} {}'.format(self.first_name, self.last_name)
 
+
 class Staff(Person):
     """docstring for Staff."""
+
     def __init__(self, *args, **kwargs):
         super(Staff, self).__init__(*args, **kwargs)
         self.person_type = 'STAFF'

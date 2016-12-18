@@ -9,10 +9,10 @@ class TestPerson(unittest.TestCase):
         self.staff = Staff('poach', 'ing', 'male')
 
     def test_person(self):
-        self.assertIsInstance(self.staff, Person, 'the object must be instance of Person')
+        self.assertIsInstance(self.staff, Person, '')
 
     def test_person_details(self):
         self.assertEqual(str(self.person), self.person.first_name + ' ' + self.person.last_name, 'Names doesnt match')
 
-    def test_person_gender(self):
-        self.assertNotEqual(self.person.gender, 'female', 'message')
+    def test_fellow(self):
+        self.assertNotEqual(self.person.gender, 'female')
