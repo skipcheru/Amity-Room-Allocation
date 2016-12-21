@@ -1,10 +1,9 @@
-from room import Room, Office, LivingSpace
-from person import Fellow, Staff
+from app.room import Room, Office, LivingSpace
+from app.person import Fellow, Staff
 from abc import abstractmethod
 import random
 import string
-# from tabulate import tabulate
-
+import json
 
 class Amity(object):
     """docstring for Amity."""
@@ -41,7 +40,6 @@ class Amity(object):
                     elif room_type.lower() in ('office', 'o'):
                         office = Office(room_name.lower())
                         self.offices.append(office)
-
                     else:
                         room_type_error['room_type'].append(room_type)
                         error_list.append(room_type_error)
@@ -71,7 +69,11 @@ class Amity(object):
                     else:
                         error_list.append(room)
 
-        print('{} is not a string'.format(error_list))
+        # check errors
+        if not error_list:
+            print('Rooms created successfully')
+        else:
+            print('{} These names are invalid '.format(error_list))
 
     # Method to add person to the system and allocate room
     def add_person(self, first_name, last_name, gender, person_type, accommodation='No'):
@@ -85,54 +87,72 @@ class Amity(object):
         person_details = [self.first_name, self.last_name,
                           self.gender, self.person_type, self.accommodation]
 
-        try:
+        if all(isinstance(details, str) for details in person_details):
+            # check for null values or digits
+            if all(details.isalpha() for details in person_details):
 
-            if all(isinstance(details, str) for details in person_details):
-                # check for null values or digits
-                if all(details.isalpha() for details in person_details):
+                # check if the person exists
+                fellow = Fellow(self.first_name, self.last_name, self.gender)
+                staff = Staff(self.first_name, self.last_name, self.gender)
+
+                if self.check_names(fellow) or self.check_names(staff):
+                    print('{} {} already exists'.format(self.first_name, self.last_name ))
+
+                else:
 
                     if self.person_type.lower() == 'fellow':
-                        fellow = Fellow(self.first_name,
-                                        self.last_name, self.gender)
+                        fellow = Fellow(self.first_name, self.last_name, self.gender)
 
                         self.fellows.append({self.generate_id(): fellow})
+                        print('Fellow Added Successfully')
 
                         # allocate  fellow livingspace if he/she needs
                         if self.accommodation.lower() in ('y', 'yes'):
-                            self.allocate(fellow, accommodation='Yes')
+                            self.allocate(fellow, 'Yes')
 
                         elif self.accommodation.lower() in ('n', 'no'):
-                            self.allocate(fellow, accommodation='No')
+                            self.allocate(fellow, 'No')
 
                         else:
                             print('Invalid option. Either Yes or No')
 
                     elif self.person_type.lower() == 'staff':
-                        staff = Staff(self.first_name,
-                                      self.last_name, self.gender)
+                        staff = Staff(self.first_name, self.last_name, self.gender)
 
                         self.staffs.append({self.generate_id(): staff})
-                        self.allocate(staff, accommodation='No')
+                        self.allocate(staff, 'No')
+                        print('Staff Added Successfully')
 
                     else:
                         print('Sorry person must be either Staff or Fellow')
-                else:
-                    print('Null values or digits not accepted')
-            else:
-                raise TypeError
 
-        except TypeError:
+            else:
+                print('Null values or digits not accepted')
+        else:
             print("All values must be characters.")
 
+    # check if a person with same names exists
+    def check_names(self, person_obj):
+        self.person_obj = person_obj
+
+        fellows = [item for fellow in self.fellows for item in fellow.values()]
+
+        staffs = [item for staff in self.staffs for item in staff.values()]
+
+        if self.person_obj in fellows or self.person_obj in staffs:
+            return True
+
+        return False
+
     # Room allocation method.
-    def allocate(self, person_type, accommodation='No'):
+    def allocate(self, person_type, accommodation):
         self.person_type = person_type
         self.accommodation = accommodation
 
         # allocate random office to both fellow and staff
         if len(self.offices) == 0:
             self.andelans_unallocated_offices.append(self.person_type)
-            return 'No office to allocate you currently.'
+            #print('No office to allocate you currently.')
 
         elif any(office for office in self.offices if office.is_vacant()):
             for office in self.offices:
@@ -143,22 +163,22 @@ class Amity(object):
 
         else:
             self.andelans_unallocated_offices.append(self.person_type)
-            return 'All offices are full.'
+            print('All offices are full.')
 
         # allocate random livingspace to fellow
         if isinstance(self.person_type, Fellow) and self.accommodation == 'Yes':
 
-            if len(self.living_spaces['male']) == 0 and self.person_type.gender == 'male':
+            if len(self.living_spaces['male']) == 0 and self.person_type.gender.lower() == 'male':
                 self.fellows_unallocated_living_space.append(self.person_type)
-                return 'No livingspace to allocate you currently.'
+                #print('No livingspace to allocate you currently.')
 
-            if len(self.living_spaces['female']) == 0 and self.person_type.gender == 'female':
+            elif len(self.living_spaces['female']) == 0 and self.person_type.gender.lower() == 'female':
                 self.fellows_unallocated_living_space.append(self.person_type)
-                return 'No livingspace to allocate you currently.'
+                #print('No livingspace to allocate you currently.')
 
             elif any(living for living in self.living_spaces['male'] if living.is_vacant()):
 
-                if self.person_type.gender == 'male':
+                if self.person_type.gender.lower() == 'male':
                     for living in self.living_spaces['male']:
                         random_living_male = random.choice(
                             self.living_spaces['male'])
@@ -168,7 +188,7 @@ class Amity(object):
 
             elif any(living for living in self.living_spaces['female'] if living.is_vacant()):
 
-                if self.person_type.gender == 'female':
+                if self.person_type.gender.lower() == 'female':
                     for living in self.living_spaces['female']:
                         random_living_female = random.choice(
                             self.living_spaces['female'])
@@ -178,7 +198,7 @@ class Amity(object):
 
             else:
                 self.fellows_unallocated_living_space.append(self.person_type)
-                return 'All livingspaces are full.'
+                print('All livingspaces are full.')
 
     # generate unique id for each Andelan
     def generate_id(self):
@@ -194,13 +214,12 @@ class Amity(object):
             return andelan_id
 
     # Check if room exists in the system
-
     def check_room(self, room_name):
         self.room_name = room_name
 
         # check if room exits in offices
         is_office = [
-            office for office in amity.offices if self.room_name.lower() in office.name]
+            office for office in self.offices if self.room_name.lower() in office.name]
 
         is_male_living_space = [
             living for living in self.living_spaces['male'] if self.room_name.lower() in living.name]
@@ -216,11 +235,11 @@ class Amity(object):
 
         elif is_female_living_space:
             return 'female_living_space', is_female_living_space[0]
+
         else:
             return False
 
     # check if person exists in the system
-
     def check_person(self, person_id):
         self.person_id = person_id
 
@@ -228,7 +247,7 @@ class Amity(object):
             staff[self.person_id] for staff in self.staffs if self.person_id in staff]
 
         is_fellow = [
-            fellow[self.person_id] for fellow in amity.fellows if self.person_id in fellow]
+            fellow[self.person_id] for fellow in self.fellows if self.person_id in fellow]
 
         if is_staff:
             return 'staff', is_staff[0]
@@ -239,71 +258,105 @@ class Amity(object):
         else:
             return False
 
-    '''Realloctes a person from one room to another'''
-
+    # Realloctes a person from one room to another
     def reallocate_person(self, person_id, room_name):
         self.person_id = person_id
         self.room_name = room_name
 
         # check if both params are correct
-        try:
-            if isinstance(self.person_id, str) and isinstance(self.room_name, str):
-                # check if person and room exists
+        if isinstance(self.person_id, str) and isinstance(self.room_name, str):
 
-                person_type, person_obj = self.check_person(self.person_id)
+            if self.check_person(self.person_id.upper()) != False:
+                person_type, person_obj = self.check_person(self.person_id.upper())
+
+            if self.check_room(self.room_name) != False:
                 room_type, room_obj = self.check_room(self.room_name)
-                print(person_obj)
 
-                if person_type in ('fellow', 'staff') and room_type == 'office':
-                    # check if the office is vacant
-                    if room_obj.is_vacant():
-                        room_obj.add_occupant(person_obj)
-                        print('person reallocated successfully')
+            # check if person and room exists
+            if not self.check_person(self.person_id.upper()) and not self.check_room(self.room_name):
+                print('\nBoth person and room are not on the system\n')
 
-                    else:
-                        print('person cannot be reallocated to {}. Its not vacant'.format(
-                            self.room_name))
+            elif not self.check_person(self.person_id.upper()):
+                print('\nThe person is not on the system\n')
 
-                elif person_type == 'fellow' and room_type in ('male_living_space', 'female_living_space'):
-                    # check if the livingspace is vacant
-                    if room_obj.is_vacant():
-                        # check if person is male or female
-                        if person_obj.gender == 'male' and room_type == 'male_living_space':
-                            room_obj.add_occupant(person_obj)
-                            print('male fellow reallocated successfully')
+            elif not self.check_room(self.room_name):
+                print('\nThe room is not on the system\n')
 
-                        elif person_obj.gender == 'female' and room_type == 'female_living_space':
-                            room_obj.add_occupant(person_obj)
-                            print('female reallocated successfully')
+            elif (person_type == 'fellow' and room_type == 'male_living_space'
+                    and person_obj.gender == 'female'):
+                print(
+                    '\nSorry female fellow cannot be reallocated to male livingspace\n')
 
-                        elif person_obj.gender == 'male' and room_type == 'female_living_space':
-                            print(
-                                'male fellow cannot be reallocated to female livingspace')
+            elif (person_type == 'fellow' and room_type == 'female_living_space'
+                  and person_obj.gender == 'male'):
+                    print(
+                        '\nSorry male fellow cannot be reallocated to female livingspace\n')
 
-                        elif person_obj.gender == 'female' and room_type == 'male_living_space':
-                            print(
-                                'female fellow cannot be reallocated to male livingspace')
+            elif (person_type == 'staff' and room_type in
+                        ('female_living_space', 'male_living_space')):
 
-                    else:
-                        print('person cannot be reallocated to {}. Its not vacant'.format(
-                            self.room_name))
-
-                elif person_type == 'staff' and room_type in ('male_living_space', 'female_living_space'):
-                    return 'Sorry staff cannot be reallocated to livingspace'
-
-                elif person == False and room_type in ('office', 'male_living_space', 'female_living_space'):
-                    return 'The person is not on the system'
-
-                elif room == False and person_type in ('staff', 'fellow'):
-                    return 'The room is not on the system'
-
+                    print('\nSorry staff cannot be allocated livingspace\n')
             else:
-                raise TypeError
-        except TypeError:
+
+                if not room_obj.is_vacant():
+                    print('\nPerson cannot be reallocated to {}.\
+                        Its not vacant\n'.format(self.room_name))
+
+                elif person_obj in room_obj.occupants:
+                    print('\nSorry cannot reallocate. Person is an occupant of this room\n')
+
+                if room_obj.is_vacant() and not person_obj in room_obj.occupants:
+                    # get person previous room
+
+                    # check the previous room and the current room if are type same
+                    if room_type == 'office':
+                        previous_room = self.check_room_occupants(person_obj, 'office')
+                        room_obj.add_occupant(person_obj)
+                        # remove the person from previous room
+                        previous_room.occupants.pop(person_obj)
+                        print('\nPerson reallocated successfully\n')
+
+                    elif room_type == 'male_living_space':
+                        previous_room = self.check_room_occupants(person_obj, 'male')
+                        room_obj.add_occupant(person_obj)
+
+                        # remove the person from previous room
+                        previous_room.occupants.pop(person_obj)
+                        print('\nPerson reallocated successfully\n')
+
+                    elif room_type == 'female_living_space':
+                        previous_room = self.check_room_occupants(person_obj, 'female')
+                        room_obj.add_occupant(person_obj)
+
+                        # remove the person from previous room
+                        previous_room.occupants.pop(person_obj)
+                        print('\nPerson reallocated successfully\n')
+
+        else:
             print('Inputs must be string')
 
-    '''print room members'''
+    # get room occupant
+    def check_room_occupants(self, person_obj, room_type):
+        self.person_obj = person_obj
+        self.room_type = room_type
+        # check for person in all rooms and get room type
 
+        is_office = [office for office in self.offices if self.person_obj in office.occupants]
+
+        is_male = [living for living in self.living_spaces['male'] if self.person_obj in living.occupants]
+
+        is_female = [living for living in self.living_spaces['female'] if self.person_obj in living.occupants]
+
+        if self.room_type == "office":
+            return office[0]
+
+        elif self.room_type == "male":
+            return male_living[0]
+
+        elif self.room_type == "female":
+            return female_living[0]
+
+    # print room and room members
     def print_room(self, room_name):
         self.room_name = room_name
 
@@ -334,26 +387,26 @@ class Amity(object):
         if (len(self.offices) == 0 and len(self.living_spaces['female']) == 0
                 and len(self.living_spaces['male']) == 0):
 
-            print('currently there are no Rooms')
+            print('\nCurrently there are no Rooms\n')
 
         elif (all(len(office.occupants) == 0 for office in self.offices) and
               all(len(living.occupants) == 0 for living in self.living_spaces['male']) and
               all(len(living.occupants) == 0 for living in self.living_spaces['female'])):
 
-            print('All rooms are empty')
+            print('\nAll rooms are empty\n ')
 
         else:
 
             # print all offices
-            print('OFFICES')
+            print('\nOFFICES\n')
             self.print_room_members('office')
 
             # print all male living spaces
-            print('MALE LIVING SPACES')
+            print('\nMALE LIVING SPACES\n')
             self.print_room_members('male')
 
             # print all female living spaces
-            print('FEMALE LIVING SPACES')
+            print('\nFEMALE LIVING SPACES\n')
             self.print_room_members('female')
 
     # print all room occupants
@@ -377,19 +430,65 @@ class Amity(object):
             room for room in room_type_list if len(room.occupants) > 0]
 
         for room in rooms_with_occupants:
-            print(room.name.upper())
-
+            print(room.name.title())
+            print('-'*15)
+            names = ""
             for occupant in room.occupants:
-                print('{} {}'.format(occupant.first_name, occupant.last_name))
+                names += ('{} {}'.format(occupant.first_name, occupant.last_name))
 
+            print(names)
 
-amity = Amity()
-# amity.create_room(['Nania office', 'Oculus office',
-#                    'Peri livingspace male', 'React livingspace female'])
+    # prints all fellows and staffs who are not allocated offices or
+    # livingspaces
+    def print_unallocated(self):
+        # check if there are people in unallocated list
+        if (len(self.fellows_unallocated_living_space) == 0 and
+                len(self.andelans_unallocated_offices) == 0):
 
-# amity.add_person('Ian', 'Oti', 'male', 'fellow', 'Y')
-# amity.add_person('Arya', 'Stark', 'female', 'fellow', 'Y')
-# amity.add_person('saya', 'jack', 'male', 'staff')
-# print(amity.offices)
-# print(amity.offices[0].occupants)
-amity.print_allocations()
+            print('\nCurrently no andelan has not been allocated an office or living space\n')
+
+        elif (len(self.fellows_unallocated_living_space) > 0
+                and len(self.fellows_unallocated_living_space) > 0):
+
+            # print all fellows with no living space
+            print('\nAll Fellows Unallocated LivingSpace\n')
+
+            for fellow in self.fellows_unallocated_living_space:
+                print('{} {}'.format(fellow.first_name, fellow.last_name))
+
+            # print all staff and fellows with no office
+            print('All Andelans Unallocated Office')
+
+            for andelan in self.andelans_unallocated_offices:
+                print('{} {}'.format(andelan.first_name, andelan.last_name))
+
+    def load_people(self):
+        # open file
+        text_file = open('app/andelans.txt', 'r')
+        first_line = text_file.read(1)
+
+        # check if file is empty
+        if not first_line:
+            print('File is empty')
+
+        else:
+            for line in text_file:
+                if not line:
+                    continue
+
+                if len(line.split()) == 5:
+                    first_name, last_name, gender, person_type, allocation = line.split()
+
+                    self.add_person(first_name, last_name, gender,
+                                    person_type, allocation)
+
+                elif len(line.split()) == 4:
+                    first_name, last_name, gender, person_type = line.split()
+
+                    self.add_person(first_name, last_name, gender,
+                                    person_type, 'No')
+
+                elif len(line.split()) < 4:
+                    continue
+
+            print('People Added Successfully')
