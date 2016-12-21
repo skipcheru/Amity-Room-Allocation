@@ -4,6 +4,12 @@ This example uses docopt with the built in cmd module to demonstrate an
 interactive command application.
 Usage:
     amity create_room <name>...
+    amity add_person <first_name> <last_name> <gender> <person_type> [accommodation]
+    amity print_room <room_name>
+    amity print_unallocated
+    amity print_allocations
+    amity load_people
+    amity reallocate_person <person_id> <room_name>
     amity (-i | --interactive)
     amity (-h | --help | --version)
 Options:
@@ -52,15 +58,15 @@ def docopt_cmd(func):
 class MyInteractive(cmd.Cmd):
     intro = '\n\t++++++++++++++++++++++++++++++++++++++++++++++\n\n' \
             '\tWelcome to Amity Room Application!\n\n' \
-            '\tThe Commands For Any Action Are Listed Below\n\n' \
+            '\tThe Commands Are Listed Below\n\n' \
             '\t---------------------------------------------\n'\
-            '\ttodo task_name : Create A todo Task \n' \
-            '\tdoing task_id  : Start Doing Task \n' \
-            '\tdone task_id   : Mark Task Done \n' \
-            '\tlist todo      : View Task You Supposed To Do\n' \
-            '\tlist doing     : View Task You Are Doing \n' \
-            '\tlist done      : View Task You Have Finished\n' \
-            '\tlist all       : View All Your Tasks In All Sections\n' \
+            '\tcreate_room names : Create Rooms \n' \
+            '\tadd_person f_name, l_name, gender, type, accommodation  : Add Person To The System \n' \
+            '\tprint_room <room_name>  : Print Room Details \n' \
+            '\tprint_unallocated       : View people unallocated rooms\n' \
+            '\tprint_allocations       : View Rooms with people allocated \n' \
+            '\treallocate_person <person_id> <room_name>    : Reallocates Person To New Room\n' \
+            '\tload_people      : Add People to the system from a text file\n' \
             '\tquit           : To Exit\n' \
             '\t---------------------------------------------\n\n' \
             '\t+++++++++++++++++++++++++++++++++++++++++++++++++\n'
@@ -69,20 +75,66 @@ class MyInteractive(cmd.Cmd):
     file = None
     amity = Amity()
 
-    # start functions here
-    def create_room(self, name):
-        self.amity.create_room(name)
-
     # start commands here
     @docopt_cmd
     def do_create_room(self, args):
-        """Create a todo task. For example todo email Kipngotie at 2pm
-        Usage: todo <name>..."""
-        self.create_room(args["<name>"])
+        """Create Rooms. Usage: create_room <name>..."""
+
+        names = args['<name>']
+        rooms = ' '.join(names)
+        self.amity.create_room(rooms.split(','))
+
+    @docopt_cmd
+    def do_add_person(self, args):
+        """Usage: add_person <first_name> <last_name> <gender> <person_type>
+         [<accommodation>]"""
+
+        first_name = args['<first_name>']
+        last_name = args['<last_name>']
+        gender = args['<gender>']
+        person_type = args['<person_type>']
+        accomm = args['<accommodation>']
+
+        self.amity.add_person(first_name, last_name, gender,
+                                person_type, accomm)
+
+    @docopt_cmd
+    def do_print_room(self, args):
+        """Usage: print_room <room_name>"""
+
+        room_name = args['<room_name>']
+        self.amity.print_room(room_name)
+
+    @docopt_cmd
+    def do_print_unallocated(self, args):
+        """Usage: print_unallocated """
+
+        self.amity.print_unallocated()
+
+    @docopt_cmd
+    def do_print_allocations(self, args):
+        """Usage: print_allocations"""
+
+        self.amity.print_allocations()
+
+    @docopt_cmd
+    def do_reallocate_person(self, args):
+        """Usage: reallocate_person <person_id> <room_name>"""
+
+        person_id = args['<person_id>']
+        room_name  = args['<room_name>']
+
+        self.amity.reallocate_person(person_id, room_name)
+
+    @docopt_cmd
+    def do_load_people(self, args):
+        """Usage: load_people """
+
+        self.amity.load_people()
 
     def do_quit(self, arg):
         """Quits out of Interactive Mode."""
-        print('\nBye Bye! See you soon!\n')
+        print('\nBye Bye!\n')
         exit()
 
 # interactive mode
