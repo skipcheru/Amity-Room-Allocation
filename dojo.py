@@ -56,20 +56,19 @@ def docopt_cmd(func):
 
 
 class MyInteractive(cmd.Cmd):
-    intro = '\n\t++++++++++++++++++++++++++++++++++++++++++++++\n\n' \
-            '\tWelcome to Amity Room Application!\n\n' \
+    intro = '\tWelcome to Amity Room Application!\n\n' \
             '\tThe Commands Are Listed Below\n\n' \
             '\t---------------------------------------------\n'\
-            '\tcreate_room names : Create Rooms \n' \
-            '\tadd_person f_name, l_name, gender, type, accommodation  : Add Person To The System \n' \
-            '\tprint_room <room_name>  : Print Room Details \n' \
-            '\tprint_unallocated       : View people unallocated rooms\n' \
-            '\tprint_allocations       : View Rooms with people allocated \n' \
-            '\treallocate_person <person_id> <room_name>    : Reallocates Person To New Room\n' \
-            '\tload_people      : Add People to the system from a text file\n' \
-            '\tquit           : To Exit\n' \
-            '\t---------------------------------------------\n\n' \
-            '\t+++++++++++++++++++++++++++++++++++++++++++++++++\n'
+            '\tCreate Rooms        : create_room names \n' \
+            '\tAdd Person          : add_person <f_name> <l_name> <gender> <type> <accommodation> \n' \
+            '\tView Room Occupants : print_allocations       \n' \
+            '\tPrint Room Details  : print_room <room_name>   \n' \
+            '\tView unallocated    : print_unallocated  \n' \
+            '\tReallocate Person   : reallocate_person <person_id> <room_name>   \n' \
+            '\tLoad People List    : load_people   \n' \
+            '\tquit                : To Exit\n' \
+            '\t---------------------------------------------\n\n'
+
 
     prompt = '(Amity App) '
     file = None
