@@ -1,5 +1,6 @@
 from app.room import Room, Office, LivingSpace
 from app.person import Fellow, Staff
+
 from abc import abstractmethod
 import random
 import string
@@ -599,3 +600,25 @@ class Amity(object):
                     continue
 
             print('People Added Successfully')
+
+    #save all data to db
+    def save_state(self, db_name=None):
+        from app.database import AmityData
+        self.db_name = db_name
+        if self.db_name:
+            amity_data = AmityData(self.db_name)
+        else:
+            amity_data = AmityData()
+
+        amity_data.save_data()
+
+    def load_state(self, db_name=None):
+        from app.database import AmityData
+
+        self.db_name = db_name
+        if self.db_name:
+            amity_data = AmityData(self.db_name)
+        else:
+            amity_data = AmityData()
+
+        amity_data.load_data()
