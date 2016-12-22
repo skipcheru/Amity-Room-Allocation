@@ -76,7 +76,7 @@ class Amity(object):
             print('{} These names are invalid '.format(error_list))
 
     # Method to add person to the system and allocate room
-    def add_person(self, first_name, last_name, gender, person_type, accommodation='No'):
+    def add_person(self, first_name, last_name, gender, person_type, accommodation=None):
 
         self.first_name = first_name
         self.last_name = last_name
@@ -130,6 +130,23 @@ class Amity(object):
                 print('Null values or digits not accepted')
         else:
             print("All values must be characters.")
+
+    # print all fellows and staff
+    def print_all_people(self):
+
+        print('\nSTAFF\n')
+        print('-'*16)
+
+        for staff in self.staffs:
+            for person_id, person in staff.items() :
+                print ('Id ' + person_id + ' : Name '+  person.first_name.title(), person.last_name.title())
+
+        print('\nFELLOWS\n')
+        print('-'*16)
+
+        for fellow in self.fellows:
+            for person_id, person in fellow.items() :
+                print ('Id ' + person_id + ' : Name '+  person.first_name.title(), person.last_name.title())
 
     # check if a person with same names exists
     def check_names(self, person_obj):
@@ -311,25 +328,37 @@ class Amity(object):
                     # check the previous room and the current room if are type same
                     if room_type == 'office':
                         previous_room = self.check_room_occupants(person_obj, 'office')
-                        room_obj.add_occupant(person_obj)
                         # remove the person from previous room
-                        previous_room.occupants.pop(person_obj)
+                        if previous_room:
+                            previous_room.occupants.pop(person_obj)
+                            room_obj.add_occupant(person_obj)
+                        else:
+                            room_obj.add_occupant(person_obj)
+
+
                         print('\nPerson reallocated successfully\n')
 
                     elif room_type == 'male_living_space':
                         previous_room = self.check_room_occupants(person_obj, 'male')
-                        room_obj.add_occupant(person_obj)
-
                         # remove the person from previous room
-                        previous_room.occupants.pop(person_obj)
+                        if previous_room:
+                            previous_room.occupants.pop(person_obj)
+                            room_obj.add_occupant(person_obj)
+
+                        else:
+                            room_obj.add_occupant(person_obj)
+
                         print('\nPerson reallocated successfully\n')
 
                     elif room_type == 'female_living_space':
                         previous_room = self.check_room_occupants(person_obj, 'female')
-                        room_obj.add_occupant(person_obj)
-
                         # remove the person from previous room
-                        previous_room.occupants.pop(person_obj)
+                        if previous_room:
+                            previous_room.occupants.pop(person_obj)
+                            room_obj.add_occupant(person_obj)
+                        else:
+                            room_obj.add_occupant(person_obj)
+
                         print('\nPerson reallocated successfully\n')
 
         else:
@@ -348,13 +377,22 @@ class Amity(object):
         is_female = [living for living in self.living_spaces['female'] if self.person_obj in living.occupants]
 
         if self.room_type == "office":
-            return office[0]
+            if is_office:
+                return is_office[0]
+            else:
+                return False
 
         elif self.room_type == "male":
-            return male_living[0]
+            if is_male:
+                return is_male[0]
+            else:
+                return False
 
         elif self.room_type == "female":
-            return female_living[0]
+            if is_female:
+                return mis_female[0]
+            else:
+                return False
 
     # print room and room members
     def print_room(self, room_name):
@@ -363,51 +401,69 @@ class Amity(object):
         if isinstance(self.room_name, str):
 
             if self.check_room(self.room_name) is False:
-                print('The room does not exist')
+                print('\nThe room does not exist\n')
 
             else:
                 room_type, room_obj = self.check_room(self.room_name)
 
                 if len(room_obj.occupants) == 0:
-                    print('Room has no occupants')
+                    print('\nRoom has no occupants\n')
 
                 else:
-                    print(self.room_name.upper())
+                    print(self.room_name.title())
+                    print('-'*16)
+                    members = ''
 
                     for occupant in room_obj.occupants:
-                        print('{} {}'.format(
+                        members += ('{} {}, '.format(
                             occupant.first_name, occupant.last_name))
+                    print(members)
         else:
             raise TypeError
             print('only strings allowed')
 
     # PRINT ALL ROOMS WITH THE OCCUPANTS
-    def print_allocations(self):
+    def print_allocations(self, file_name=None):
+        self.file_name = file_name
+
+        no_rooms = '\nCurrently there are no Rooms\n'
+        empty_rooms = '\nAll rooms are empty\n '
+        offices = '\nOFFICES'
+        male_living = '\nMALE LIVING SPACES'
+        female_living = '\nFEMALE LIVING SPACES'
+
         # check if rooms have been added to the system
         if (len(self.offices) == 0 and len(self.living_spaces['female']) == 0
                 and len(self.living_spaces['male']) == 0):
 
-            print('\nCurrently there are no Rooms\n')
-
-        elif (all(len(office.occupants) == 0 for office in self.offices) and
-              all(len(living.occupants) == 0 for living in self.living_spaces['male']) and
-              all(len(living.occupants) == 0 for living in self.living_spaces['female'])):
-
-            print('\nAll rooms are empty\n ')
+            if self.file_name:
+                text_file = open(self.file_name + '.txt', 'w+')
+                text_file.write(no_rooms)
+                text_file.close()
+                print('\nData saved in {}.txt\n'.format(self.file_name))
+            else:
+                print(no_rooms)
 
         else:
 
-            # print all offices
-            print('\nOFFICES\n')
-            self.print_room_members('office')
+            if self.file_name:
+                text_file = open(self.file_name + '.txt', 'w+')
+                text_file.write(offices)
+                text_file.close()
+                print('\nData saved in {}.txt\n'.format(self.file_name))
 
-            # print all male living spaces
-            print('\nMALE LIVING SPACES\n')
-            self.print_room_members('male')
+            else:
+                # print all offices
+                print(offices)
+                self.print_room_members('office')
 
-            # print all female living spaces
-            print('\nFEMALE LIVING SPACES\n')
-            self.print_room_members('female')
+                # print all male living spaces
+                print(male_living)
+                self.print_room_members('male')
+
+                # print all female living spaces
+                print(female_living)
+                self.print_room_members('female')
 
     # print all room occupants
     def print_room_members(self, room_type):
@@ -426,21 +482,22 @@ class Amity(object):
         else:
             return False
 
-        rooms_with_occupants = [
-            room for room in room_type_list if len(room.occupants) > 0]
+        rooms_with_occupants = [room for room in room_type_list]
 
         for room in rooms_with_occupants:
-            print(room.name.title())
+            print('\n'+room.name.title())
             print('-'*15)
             names = ""
             for occupant in room.occupants:
-                names += ('{} {}'.format(occupant.first_name, occupant.last_name))
+                names += ('{} {}, '.format(occupant.first_name, occupant.last_name))
 
             print(names)
 
     # prints all fellows and staffs who are not allocated offices or
     # livingspaces
-    def print_unallocated(self):
+    def print_unallocated(self, file_name=None):
+        self.file_name = file_name
+
         # check if there are people in unallocated list
         if (len(self.fellows_unallocated_living_space) == 0 and
                 len(self.andelans_unallocated_offices) == 0):
@@ -450,21 +507,46 @@ class Amity(object):
         elif (len(self.fellows_unallocated_living_space) > 0
                 and len(self.fellows_unallocated_living_space) > 0):
 
-            # print all fellows with no living space
-            print('\nAll Fellows Unallocated LivingSpace\n')
+
+            title_one = 'All Fellows Unallocated LivingSpace\n'
+
+            fellows = ''
 
             for fellow in self.fellows_unallocated_living_space:
-                print('{} {}'.format(fellow.first_name, fellow.last_name))
+                fellows += ('{} {}, '.format(fellow.first_name, fellow.last_name))
 
-            # print all staff and fellows with no office
-            print('All Andelans Unallocated Office')
+
+            title_two = 'All Andelans Unallocated Office\n'
+
+            andelans = ''
 
             for andelan in self.andelans_unallocated_offices:
-                print('{} {}'.format(andelan.first_name, andelan.last_name))
+                andelans += ('{} {}, '.format(andelan.first_name, andelan.last_name))
 
-    def load_people(self):
+
+            # if file_name is passed write to the file and save
+
+            if self.file_name:
+                text_file = open(self.file_name + '.txt', 'w+')
+                text_file.write(title_one + '\n')
+                text_file.write(fellows + '\n')
+                text_file.write(title_two + '\n')
+                text_file.write(andelans + '\n')
+                text_file.close()
+                print('\nData saved in {}.txt\n'.format(self.file_name))
+
+            else:
+                # print all staff and fellows with no office
+                print('\n'+ title_one)
+                print(fellows)
+                # print all fellows with no living space
+                print('\n'+ title_two)
+                print(andelans +'\n')
+
+    def load_people(self, file_name=None):
         # open file
-        text_file = open('app/andelans.txt', 'r')
+        self.file_name = file_name
+        text_file = open('app/'+ self.file_name + '.txt', 'r')
         first_line = text_file.read(1)
 
         # check if file is empty
