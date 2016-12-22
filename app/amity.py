@@ -1,13 +1,13 @@
 from app.room import Room, Office, LivingSpace
 from app.person import Fellow, Staff
-
+from app.singleton import Singleton
 from abc import abstractmethod
 import random
 import string
 import json
 
-class Amity(object):
-    """docstring for Amity."""
+class Amity(metaclass=Singleton):
+    """All app functions are implemented Here."""
 
     def __init__(self):
         self.staffs = []
@@ -92,7 +92,10 @@ class Amity(object):
         self.last_name = last_name
         self.person_type = person_type
         self.gender = gender
-        self.accommodation = accommodation
+        self.accommodation = 'N'
+
+        if accommodation:
+            self.accommodation = accommodation
 
         person_details = [self.first_name, self.last_name,
                           self.gender, self.person_type, self.accommodation]
@@ -131,6 +134,7 @@ class Amity(object):
 
                         self.staffs.append({self.generate_id(): staff})
                         self.allocate(staff, 'No')
+
                         print('Staff Added Successfully')
 
                     else:
@@ -146,17 +150,21 @@ class Amity(object):
 
         print('\nSTAFF\n')
         print('-'*16)
-
+        count = 0
         for staff in self.staffs:
             for person_id, person in staff.items() :
-                print ('Id ' + person_id + ' : Name '+  person.first_name.title(), person.last_name.title())
+                print (count, ' ' + person_id + ' : Name '+  person.first_name.title(), person.last_name.title())
+                count += 1
 
         print('\nFELLOWS\n')
         print('-'*16)
 
         for fellow in self.fellows:
             for person_id, person in fellow.items() :
-                print ('Id ' + person_id + ' : Name '+  person.first_name.title(), person.last_name.title())
+                print (count, ' ' + person_id + ' : Name '+  person.first_name.title(), person.last_name.title())
+                count += 1
+
+        print('\n')
 
     # check if a person with same names exists
     def check_names(self, person_obj):
@@ -306,7 +314,8 @@ class Amity(object):
                 room_type, room_obj = self.check_room(self.room_name)
 
             # check if person and room exists
-            if not self.check_person(self.person_id.upper()) and not self.check_room(self.room_name):
+            if not self.check_person(
+            self.person_id.upper()) and not self.check_room(self.room_name):
                 print('\nBoth person and room are not on the system\n')
 
             elif not self.check_person(self.person_id.upper()):
@@ -333,7 +342,7 @@ class Amity(object):
 
                 if not room_obj.is_vacant():
                     print('\nPerson cannot be reallocated to {}.\
-                        Its not vacant\n'.format(self.room_name))
+                        Its not vacant '.format(self.room_name))
 
                 elif person_obj in room_obj.occupants:
                     print('\nSorry cannot reallocate. Person is an occupant of this room\n')
@@ -345,9 +354,13 @@ class Amity(object):
                     if room_type == 'office':
                         previous_room = self.check_room_occupants(person_obj, 'office')
                         # remove the person from previous room
+                        if person_obj in self.andelans_unallocated_offices:
+                            self.andelans_unallocated_offices.remove(person_obj)
+
                         if previous_room:
                             previous_room.occupants.remove(person_obj)
                             room_obj.add_occupant(person_obj)
+
                         else:
                             room_obj.add_occupant(person_obj)
 
@@ -361,6 +374,8 @@ class Amity(object):
                             previous_room.occupants.remove(person_obj)
                             room_obj.add_occupant(person_obj)
 
+                        if person_obj in self.living_spaces['male']:
+                            self.living_spaces['male'].remove(person_obj)
                         else:
                             room_obj.add_occupant(person_obj)
 
@@ -372,6 +387,10 @@ class Amity(object):
                         if previous_room:
                             previous_room.occupants.remove(person_obj)
                             room_obj.add_occupant(person_obj)
+
+                        if person_obj in self.living_spaces['female']:
+                            self.living_spaces['female'].remove(person_obj)
+
                         else:
                             room_obj.add_occupant(person_obj)
 
@@ -438,7 +457,7 @@ class Amity(object):
             raise TypeError
             print('only strings allowed')
 
-    # PRINT ALL ROOMS WITH THE OCCUPANTS
+    # print all rooms with occupants
     def print_allocations(self, file_name=None):
         self.file_name = file_name
 
@@ -492,7 +511,7 @@ class Amity(object):
         elif self.room_type == 'male':
             room_type_list = self.living_spaces['male']
 
-        elif self.room_type == 'male':
+        elif self.room_type == 'female':
             room_type_list = self.living_spaces['female']
 
         else:
@@ -520,13 +539,10 @@ class Amity(object):
 
             print('\nCurrently no andelan has been allocated an office or living space\n')
 
-        elif (len(self.fellows_unallocated_living_space) > 0
-                and len(self.fellows_unallocated_living_space) > 0):
-
+        else:
 
             title_one = 'All Fellows Unallocated LivingSpace\n'
             deco_1 = '-'*25
-
             fellows = ''
 
             for fellow in self.fellows_unallocated_living_space:
@@ -534,22 +550,20 @@ class Amity(object):
 
 
             title_two = 'All Andelans Unallocated Office\n'
-
             andelans = ''
 
             for andelan in self.andelans_unallocated_offices:
                 andelans += ('{} {}, '.format(andelan.first_name, andelan.last_name))
-
 
             # if file_name is passed write to the file and save
 
             if self.file_name:
                 text_file = open(self.file_name + '.txt', 'w+')
                 text_file.write(title_one + '\n')
-                text_file.write(deco_1)
+                text_file.write(deco_1 +'\n')
                 text_file.write(fellows + '\n')
                 text_file.write(title_two + '\n')
-                text_file.write(deco_1)
+                text_file.write(deco_1 +'\n')
                 text_file.write(andelans + '\n')
                 text_file.close()
                 print('\nData saved in {}.txt\n'.format(self.file_name))
@@ -557,68 +571,9 @@ class Amity(object):
             else:
                 # print all staff and fellows with no office
                 print('\n'+ title_one)
-                print(deco_1)
+                print(deco_1 +'\n')
                 print(fellows)
                 # print all fellows with no living space
                 print('\n'+ title_two)
-                print(deco_1)
+                print(deco_1 +'\n')
                 print(andelans +'\n')
-
-    def load_people(self, file_name=None):
-        # open file
-        self.file_name = file_name
-        local_file = 'andelans'
-
-        if self.file_name:
-            local_file = self.file_name
-
-        text_file = open('app/'+ local_file + '.txt', 'r')
-        first_line = text_file.read(1)
-
-        # check if file is empty
-        if not first_line:
-            print('File is empty')
-
-        else:
-            for line in text_file:
-                if not line:
-                    continue
-
-                if len(line.split()) == 5:
-                    first_name, last_name, gender, person_type, allocation = line.split()
-
-                    self.add_person(first_name, last_name, gender,
-                                    person_type, allocation)
-
-                elif len(line.split()) == 4:
-                    first_name, last_name, gender, person_type = line.split()
-
-                    self.add_person(first_name, last_name, gender,
-                                    person_type, 'No')
-
-                elif len(line.split()) < 4:
-                    continue
-
-            print('People Added Successfully')
-
-    #save all data to db
-    def save_state(self, db_name=None):
-        from app.database import AmityData
-        self.db_name = db_name
-        if self.db_name:
-            amity_data = AmityData(self.db_name)
-        else:
-            amity_data = AmityData()
-
-        amity_data.save_data()
-
-    def load_state(self, db_name=None):
-        from app.database import AmityData
-
-        self.db_name = db_name
-        if self.db_name:
-            amity_data = AmityData(self.db_name)
-        else:
-            amity_data = AmityData()
-
-        amity_data.load_data()
