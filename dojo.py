@@ -4,15 +4,15 @@ This example uses docopt with the built in cmd module to demonstrate an
 interactive command application.
 Usage:
     amity create_room <name>...
-    amity add_person <first_name> <last_name> <gender> <person_type> [--a=N]
+    amity add_person <first_name> <last_name> <gender> <person_type> [<accommodation>]
     amity print_room <room_name>
     amity reallocate_person <person_id> <room_name>
-    amity print_all_people
-    amity print_unallocated [--o=filename]
-    amity print_allocations [--o=filename]
-    amity load_people [--o=filename]
-    amity save_state [--db=name]
-    amity load_state [--db=name]
+    amity print_all
+    amity print_unallocated [<file_name>]
+    amity print_allocations [<file_name>]
+    amity load_people [<file_name>]
+    amity save_state [<db_name>]
+    amity load_state [<db_name>]
     amity (-i | --interactive)
     amity (-h | --help | --version)
 Options:
@@ -24,6 +24,7 @@ import sys
 import cmd
 from docopt import docopt, DocoptExit
 from app.amity import Amity
+from app.database import AmityData
 
 
 def docopt_cmd(func):
@@ -63,15 +64,15 @@ class MyInteractive(cmd.Cmd):
             '\tThe Commands Are Listed Below\n\n' \
             '\t---------------------------------------------\n'\
             '\tCreate Rooms        : create_room names \n' \
-            '\tAdd Person          : add_person <f_name> <l_name> <gender> <type> [--a=N] \n' \
-            '\tView Room Occupants : print_allocations  [--o=filename]     \n' \
-            '\tView All People     : print_all_people     \n' \
+            '\tAdd Person          : add_person <f_name> <l_name> <gender> <type> [<accommodation>] \n' \
+            '\tView Room Occupants : print_allocations  [<accommodation>]     \n' \
+            '\tView All People     : print_all     \n' \
             '\tPrint Room Details  : print_room <room_name>   \n' \
-            '\tView unallocated    : print_unallocated  [--o=filename] \n' \
+            '\tView unallocated    : print_unallocated  [<file_name>] \n' \
             '\tReallocate Person   : reallocate_person <person_id> <room_name>   \n' \
-            '\tLoad People List    : load_people [--o=filename]   \n' \
-            '\tSave App state      : save_state [--db=name]  \n' \
-            '\tLoad App state      : load_state [--db=name]  \n' \
+            '\tLoad People List    : load_people [<file_name>]   \n' \
+            '\tSave App state      : save_state [<db_name>]  \n' \
+            '\tLoad App state      : load_state [<db_name>]  \n' \
             '\tquit                : To Exit\n' \
             '\t---------------------------------------------\n\n'
 
@@ -79,6 +80,7 @@ class MyInteractive(cmd.Cmd):
     prompt = '(Amity App) '
     file = None
     amity = Amity()
+    amity_data = AmityData()
 
     # start commands here
     @docopt_cmd
@@ -92,16 +94,19 @@ class MyInteractive(cmd.Cmd):
     @docopt_cmd
     def do_add_person(self, args):
         """Usage: add_person <first_name> <last_name> <gender> <person_type>
-         [--a=N]"""
+         [<accommodation>]"""
 
         first_name = args['<first_name>']
         last_name = args['<last_name>']
         gender = args['<gender>']
         person_type = args['<person_type>']
-        accomm = args['--a']
+        accomm = args['<accommodation>']
 
-        self.amity.add_person(first_name, last_name, gender,
-                                person_type, accomm)
+        if accomm:
+            self.amity.add_person(first_name, last_name, gender, person_type, accomm)
+        else:
+            self.amity.add_person(first_name, last_name, gender, person_type)
+
 
     @docopt_cmd
     def do_print_room(self, args):
@@ -112,8 +117,8 @@ class MyInteractive(cmd.Cmd):
 
     @docopt_cmd
     def do_print_unallocated(self, args):
-        """Usage: print_unallocated [--o=filename]"""
-        file_name = args['--o']
+        """Usage: print_unallocated [<file_name>]"""
+        file_name = args['<file_name>']
 
         if file_name:
             self.amity.print_unallocated(file_name)
@@ -122,8 +127,8 @@ class MyInteractive(cmd.Cmd):
 
     @docopt_cmd
     def do_print_allocations(self, args):
-        """Usage: print_allocations [--o=filename]"""
-        file_name = args['--o']
+        """Usage: print_allocations [<file_name>]"""
+        file_name = args['<file_name>']
 
         if file_name:
             self.amity.print_allocations(file_name)
@@ -142,31 +147,37 @@ class MyInteractive(cmd.Cmd):
         self.amity.reallocate_person(person_id, room_name)
 
     @docopt_cmd
-    def do_print_all_people(self, args):
-        """Usage: print_all_people """
+    def do_print_all(self, args):
+        """Usage: print_all """
 
         self.amity.print_all_people()
 
     @docopt_cmd
     def do_load_people(self, args):
-        """Usage: load_people [--o=filename] """
-        file_name = args['--o']
+        """Usage: load_people [<file_name>] """
+        file_name = args['<file_name>']
 
-        self.amity.load_people(file_name)
+        self.amity_data.load_people(file_name)
 
     @docopt_cmd
     def do_save_state(self, args):
-        """Usage: save_state [--db=name]"""
-        db_name = args['--db']
+        """Usage: save_state [<db_name>]"""
+        db_name = args['<db_name>']
 
-        self.amity.save_state(db_name)
+        if db_name:
+            AmityData(db_name).save_state()
+        else:
+            self.amity_data.save_state()
 
     @docopt_cmd
     def do_load_state(self, args):
-        """Usage: load_state [--db=name]"""
-        db_name = args['--db']
+        """Usage: load_state [<db_name>]"""
+        db_name = args['<db_name>']
 
-        self.amity.load_state(db_name)
+        if db_name:
+            AmityData(db_name).load_state()
+        else:
+            self.amity_data.load_state()
 
     def do_quit(self, arg):
         """Quits out of Interactive Mode."""
