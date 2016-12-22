@@ -4,11 +4,12 @@ This example uses docopt with the built in cmd module to demonstrate an
 interactive command application.
 Usage:
     amity create_room <name>...
-    amity add_person <first_name> <last_name> <gender> <person_type> [accommodation]
+    amity add_person <first_name> <last_name> <gender> <person_type> [--accommodation=N]
     amity print_room <room_name>
-    amity print_unallocated
-    amity print_allocations
-    amity load_people
+    amity print_all_people
+    amity print_unallocated [--o=filename]
+    amity print_allocations [--o=filename]
+    amity load_people [--o=filename]
     amity reallocate_person <person_id> <room_name>
     amity (-i | --interactive)
     amity (-h | --help | --version)
@@ -60,12 +61,13 @@ class MyInteractive(cmd.Cmd):
             '\tThe Commands Are Listed Below\n\n' \
             '\t---------------------------------------------\n'\
             '\tCreate Rooms        : create_room names \n' \
-            '\tAdd Person          : add_person <f_name> <l_name> <gender> <type> <accommodation> \n' \
-            '\tView Room Occupants : print_allocations       \n' \
+            '\tAdd Person          : add_person <f_name> <l_name> <gender> <type> [--accommodation=N] \n' \
+            '\tView Room Occupants : print_allocations  [--o=filename]     \n' \
+            '\tView All People     : print_all_people     \n' \
             '\tPrint Room Details  : print_room <room_name>   \n' \
-            '\tView unallocated    : print_unallocated  \n' \
+            '\tView unallocated    : print_unallocated  [--o=filename] \n' \
             '\tReallocate Person   : reallocate_person <person_id> <room_name>   \n' \
-            '\tLoad People List    : load_people   \n' \
+            '\tLoad People List    : load_people [--o=filename]  \n' \
             '\tquit                : To Exit\n' \
             '\t---------------------------------------------\n\n'
 
@@ -86,13 +88,13 @@ class MyInteractive(cmd.Cmd):
     @docopt_cmd
     def do_add_person(self, args):
         """Usage: add_person <first_name> <last_name> <gender> <person_type>
-         [<accommodation>]"""
+         [--accommodation=N]"""
 
         first_name = args['<first_name>']
         last_name = args['<last_name>']
         gender = args['<gender>']
         person_type = args['<person_type>']
-        accomm = args['<accommodation>']
+        accomm = args['--accommodation']
 
         self.amity.add_person(first_name, last_name, gender,
                                 person_type, accomm)
@@ -106,15 +108,25 @@ class MyInteractive(cmd.Cmd):
 
     @docopt_cmd
     def do_print_unallocated(self, args):
-        """Usage: print_unallocated """
+        """Usage: print_unallocated [--o=filename]"""
+        file_name = args['--o']
 
-        self.amity.print_unallocated()
+        if file_name:
+            self.amity.print_unallocated(file_name)
+        else:
+            self.amity.print_unallocated()
 
     @docopt_cmd
     def do_print_allocations(self, args):
-        """Usage: print_allocations"""
+        """Usage: print_allocations [--o=filename]"""
+        file_name = args['--o']
 
-        self.amity.print_allocations()
+        if file_name:
+            self.amity.print_allocations(file_name)
+
+        else:
+            self.amity.print_allocations()
+
 
     @docopt_cmd
     def do_reallocate_person(self, args):
@@ -126,10 +138,17 @@ class MyInteractive(cmd.Cmd):
         self.amity.reallocate_person(person_id, room_name)
 
     @docopt_cmd
-    def do_load_people(self, args):
-        """Usage: load_people """
+    def do_print_all_people(self, args):
+        """Usage: print_all_people """
 
-        self.amity.load_people()
+        self.amity.print_all_people()
+
+    @docopt_cmd
+    def do_load_people(self, args):
+        """Usage: load_people [--o=filename] """
+        file_name = args['--o']
+
+        self.amity.load_people(file_name)
 
     def do_quit(self, arg):
         """Quits out of Interactive Mode."""
