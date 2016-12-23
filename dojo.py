@@ -120,22 +120,14 @@ class MyInteractive(cmd.Cmd):
         """Usage: print_unallocated [<file_name>]"""
         file_name = args['<file_name>']
 
-        if file_name:
-            self.amity.print_unallocated(file_name)
-        else:
-            self.amity.print_unallocated()
+        self.amity.print_unallocated(file_name)
 
     @docopt_cmd
     def do_print_allocations(self, args):
         """Usage: print_allocations [<file_name>]"""
         file_name = args['<file_name>']
 
-        if file_name:
-            self.amity.print_allocations(file_name)
-
-        else:
-            self.amity.print_allocations()
-
+        self.amity.print_allocations(file_name)
 
     @docopt_cmd
     def do_reallocate_person(self, args):
@@ -144,7 +136,7 @@ class MyInteractive(cmd.Cmd):
         person_id = args['<person_id>']
         room_name  = args['<room_name>']
 
-        self.amity.reallocate_person(person_id, room_name)
+        print(self.amity.reallocate_person(person_id, room_name))
 
     @docopt_cmd
     def do_print_all(self, args):
@@ -164,20 +156,14 @@ class MyInteractive(cmd.Cmd):
         """Usage: save_state [<db_name>]"""
         db_name = args['<db_name>']
 
-        if db_name:
-            AmityData(db_name).save_state()
-        else:
-            self.amity_data.save_state()
+        AmityData(db_name).save_state()
 
     @docopt_cmd
     def do_load_state(self, args):
         """Usage: load_state [<db_name>]"""
         db_name = args['<db_name>']
 
-        if db_name:
-            AmityData(db_name).load_state()
-        else:
-            self.amity_data.load_state()
+        AmityData(db_name).load_state()
 
     def do_quit(self, arg):
         """Quits out of Interactive Mode."""
