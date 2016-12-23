@@ -1,20 +1,8 @@
-from app.room import Room, Office, LivingSpace
-from app.person import Fellow, Staff
-from abc import abstractmethod
-import random
-import string
 
-class Amity(object):
-    """docstring for Amity."""
+class Algo:
+    """Pseudo codes Room allocation."""
+
     def __init__(self):
-        self.staffs = []
-        self.fellows = []
-        self.fellows_unallocated_living_space = []
-        self.andelans_unallocated_offices = []
-        self.offices = []
-        self.male_living_spaces = []
-        self.female_living_spaces = []
-        self.set_of_ids = set()
 
     # create room and add to the list of rooms
     def create_room(self, *room_names):
@@ -26,20 +14,19 @@ class Amity(object):
         # check the no of offices and livingspaces are equal.
         # check if the list of offices contains only objects of type Office
         # check if the list of living spaces contains objects of type LivingSpace
-        # check if error raised if an office exists on the system with the same name
-
+        # check if error raised if an office exists on the system with the same
+        # name
 
         '''algorithm'''
-        #check if room names are all strings
+        # check if room names are all strings
         # for each name the format should be name-o or name-l-m
-            # for each name split -
-                # if the letter after - is o
-                    # create office
-                    # add office to list of offices
-                # if the letter after - is l
-                    # create livingspace
-                    # add livingspace to list of livingspaces
-
+        # for each name split -
+        # if the letter after - is o
+        # create office
+        # add office to list of offices
+        # if the letter after - is l
+        # create livingspace
+        # add livingspace to list of livingspaces
 
     # add person to system
     def add_person(self, first_name, last_name, person_type, gender, accommodation='N'):
@@ -55,29 +42,29 @@ class Amity(object):
         # check if the list of fellows has the person added
         # check if the list of staff has the person added
         # check if person has been moved to unallocated if all rooms are full
-            # check if offices are full people are moved to unallocated_offices
-            # check if livingspaces are full fellow are moved to unallocated_living_space
+        # check if offices are full people are moved to unallocated_offices
+        # check if livingspaces are full fellow are moved to
+        # unallocated_living_space
 
         '''algorithm'''
         # check if person details are all strings
-            # if not
-                #raise error
-            # if person details is none
-                # raise error
-            # if type of person is fellow
-                # create fellow, add unique id and add fellow to dictionary
-                # allocate fellow an office [done by room]
-                # if fellow wants accommodation
-                    # if fellow is male
-                        # allocate the fellow a male livingspace [done by room]
-                    # if fellow is female
-                        # allocate the fellow a female livingspace
-                # else
-                    # pass
-            # if type of person is staff
-                # create fellow, add unique id and add fellow to dictionary
-                # allocate fellow an office [done by room]
-
+        # if not
+        #raise error
+        # if person details is none
+        # raise error
+        # if type of person is fellow
+        # create fellow, add unique id and add fellow to dictionary
+        # allocate fellow an office [done by room]
+        # if fellow wants accommodation
+        # if fellow is male
+        # allocate the fellow a male livingspace [done by room]
+        # if fellow is female
+        # allocate the fellow a female livingspace
+        # else
+        # pass
+        # if type of person is staff
+        # create fellow, add unique id and add fellow to dictionary
+        # allocate fellow an office [done by room]
 
     def generate_id(self):
         pass
@@ -97,31 +84,30 @@ class Amity(object):
         # >> if the room type is living space and the person has been allocated livingspace
         # check if staff is moved to another office
         # check if fellow is moved to another office
-        # check if the room to be reallocated is the same room which the person occupies
-
+        # check if the room to be reallocated is the same room which the person
+        # occupies
 
         '''algorithm'''
         # check if person id and room name are all strings or null
-            # if not
-                # raise error
-            # if person does not exist in system
-                # raise error
-            # if room does not exist in system
-                # raise error
-            # if both exist
-                # check person type
-                # check room type
-                # if room is vacant
-                    # if person = fellow and room = livingspace
-                        # move fellow to vacant space
-                        # remove fellow from previous room
-                    # if person = (fellow or fellow) and room = office
-                        # move person to vacant office
-                        # remove person from previous office
-                    # if person = staff and room = livingspace
-                        # return error
-                # else raise error
-
+        # if not
+        # raise error
+        # if person does not exist in system
+        # raise error
+        # if room does not exist in system
+        # raise error
+        # if both exist
+        # check person type
+        # check room type
+        # if room is vacant
+        # if person = fellow and room = livingspace
+        # move fellow to vacant space
+        # remove fellow from previous room
+        # if person = (fellow or fellow) and room = office
+        # move person to vacant office
+        # remove person from previous office
+        # if person = staff and room = livingspace
+        # return error
+        # else raise error
 
     def print_room(self, room_name):
         '''Tests'''
@@ -132,37 +118,36 @@ class Amity(object):
 
         '''algorithm'''
         # check if room name is string
-            # if not raise error.
+        # if not raise error.
         # check if room exists
-            # if not
-                # raise error
-            # else
-                # if room has occupants
-                    # print all
-                # else
-                    # prompt room has no occupants
+        # if not
+        # raise error
+        # else
+        # if room has occupants
+        # print all
+        # else
+        # prompt room has no occupants
 
     def load_people(self):
         '''Tests'''
         # check if error is raised if the text if file is emty
         # check if prompt raised and they are not allocated rooms
-            # if some lines in the text file does not conform to the format
+        # if some lines in the text file does not conform to the format
         # check if all people in the file has been added to the system.
         # check if all both fellows and staff in the file has been allocated offices
         # check if fellows who need living space have been allocated
 
         '''algorithm'''
         # check if the text if file is emty
-            # if true
-                # prompt user
-            # else
-                # for each line check if text format is ok
-                    # if ok
-                        # add person to system and allocate room
-                        # output the list of people added to the system.
-                    # if not add to list of errors
-                        # output the people not added to the system
-
+        # if true
+        # prompt user
+        # else
+        # for each line check if text format is ok
+        # if ok
+        # add person to system and allocate room
+        # output the list of people added to the system.
+        # if not add to list of errors
+        # output the people not added to the system
 
     def print_allocations(self):
         '''Tests'''
@@ -171,22 +156,20 @@ class Amity(object):
         # check if all offices are printed with their respective occupants
         # check if all living spaces for male and female are printed
 
-
         '''algorithm'''
         # check if rooms have been added to the system
-            # if true
-                # print all offices + occupants
-                # print all living spaces for male + occupants
-                # print all living spaces for female + occupants
-                # print all rooms which have no occupants
+        # if true
+        # print all offices + occupants
+        # print all living spaces for male + occupants
+        # print all living spaces for female + occupants
+        # print all rooms which have no occupants
 
-            # else
-                # raise prompt
-
+        # else
+        # raise prompt
 
     def print_unallocated(self):
         '''Tests'''
-        # check if the number of people listed equal the lenght of unallocated list
+        # check if the number of people listed equal the length of unallocated list
         # check if prompt is issued if there is no people on allocated list
 
         '''algorithm'''
