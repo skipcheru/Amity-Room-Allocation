@@ -7,64 +7,61 @@ class TestReallocatePerson(unittest.TestCase):
     """docstring for TestReallocatePerson."""
     def setUp(self):
         self.amity = Amity()
+        office = Office('oculus')
+        office1 = Office('nania')
 
-    # check if error raised if both params are not strings.
-    def test_error_raised(self):
-        self.assertRaises(TypeError, self.amity.reallocate_person())
-        self.assertRaises(TypeError, self.amity.reallocate_person(123, 'nania'))
+        self.amity.offices.append(office)
+        self.amity.offices.append(office1)
+
+        living = LivingSpace('peri')
+        living2 = LivingSpace('swift')
+        living3 = LivingSpace('react')
+
+        self.amity.living_spaces['male'].append(living)
+        self.amity.living_spaces['female'].append(living2)
+        self.amity.living_spaces['female'].append(living3)
+
+        self.staff = Staff('carol', 'radul', 'female')
+        self.fellow = Fellow('Sam', 'Kip', 'male')
+        self.fellow2 = Fellow('Ivy', 'osodo', 'female')
 
     # check if error raised if the person doesn't exist in the system.
     def test_reallocate_unknown_person(self):
-        unknown_person_error = self.amity.reallocate_person('F101', 'Oculus')
-        self.assertEqual('person has not been added to the system', unknown_person_error)
+        unknown_person = self.amity.reallocate_person('F101', 'oculus')
+        self.assertEqual(unknown_person, 'The person is not on the system')
 
     # check if error raised if the room doesn't exist in the system.
     def test_reallocate_unknown_room(self):
-        unknown_room_error = self.amity.reallocate_person('F001', 'room')
-        self.assertEqual('the room is not in the system', unknown_room_error)
+
+        self.amity.fellows.append({'F001': self.fellow})
+        unknown_room = self.amity.reallocate_person('F001', 'room')
+        self.assertEqual('The room is not on the system', unknown_room)
 
     # check if error is raised if person is staff and the room to be allocated is living
     def test_reallocate_staff_to_livingspace(self):
-        self.amity.create_room('nania-o', 'peri-l-m', 'oculus-o', 'swift-l-f')
-        self.amity.add_person('carol', 'radul', 'staff', 'female')
-        reallocate_staff = self.amity.reallocate_person('S001', 'peri')
-        self.assertEqual('staff cannot be reallocated to living room', reallocate_staff)
+        self.amity.staffs.append({'S001': self.staff})
+        self.amity.offices[0].occupants.append(self.staff)
+
+        reallocate_staff = self.amity.reallocate_person('S001', 'Peri')
+        self.assertEqual('Sorry staff cannot be allocated livingspace', reallocate_staff)
 
     # check if the person above is not reallocated to the specified room
     def test_staff_not_reallocated_to_living_space(self):
-        staff = Staff('carol', 'radul', 'female')
-        self.assertFalse(staff in self.amity.female_living_spaces[0].occupants)
+
+        self.assertFalse(self.staff in self.amity.living_spaces['male'][0].occupants)
 
     # check if fellow is reallocated to another livingspace
     def test_reallocte_fellow(self):
-        # add ivy to system and create new female livingspace
-        self.amity.add_person('ivy', 'osodo', 'fellow', 'female')
-        self.amity.create_room('react-l-f')
-        fellow = Fellow('ivy', 'osodo', 'female', 'Y')
-        self.amity.reallocate_person('F001', 'react') # assume carol was allocated office Nania initially
-        self.assertIn(fellow, self.amity.female_living_spaces[1].occupants, 'Felllow reallocated from Swift to React livingspace')
+        self.amity.living_spaces['female'][0].occupants.append(self.fellow2)
+        self.amity.reallocate_person('F002', 'react')
+        self.assertTrue(self.fellow2 in self.amity.living_spaces['female'][0].occupants)
 
     # check if staff is moved to another office
     def test_reallocte_staff(self):
-        carol = Staff('carol', 'radul', 'female')
-        self.amity.reallocate_person('S001', 'oculus') # assume carol was allocated office Nania initially
-        self.assertIn(carol, self.amity.offices[1].occupants, 'carol reallocated to office Oculus')
-        self.assertFalse(carol in self.amity.offices[0].occupants, 'carol is not in office Nania')
-
-    # check if error raised if all rooms in amity are full
-    def test_reallocte_if_all_rooms_are_full(self):
-        self.amity.create_room('krypton-o')
-        # assert all offices are not vacant
-        self.amity.offices[0].is_vacant = False
-        self.amity.offices[1].is_vacant = False
-        self.amity.offices[2].is_vacant = False
-
-        reallocate_carol = self.amity.reallocate_person('S001', 'krypton')
-        self.assertTrue(len(self.amity.offices[2].occupants) is 4, 'message')
-        self.assertEqual('All offices not vacant curently.', reallocate_carol)
-
-    # check if the room to be reallocated is the same room which the person occupies
-    def test_reallocate_room_occupant_to_same_room(self):
-        reallocate_again_carol = self.amity.reallocate_person('S001', 'krypton')
-        self.assertTrue(len(self.amity.offices[2].occupants) is 4, 'message')
-        self.assertEqual('Person is already an occupant of this room.', reallocate_again_carol)
+        self.amity.reallocate_person('S001', 'oculus')
+        self.amity.reallocate_person('S001', 'nania')
+        self.assertFalse(self.staff in self.amity.offices[0].occupants) # Oculus
+        self.assertTrue(self.staff in self.amity.offices[1].occupants) # Nania
+        # check if the room to be reallocated is the same room which the person occupies
+        reallocate_again = self.amity.reallocate_person('S001', 'nania')
+        self.assertEqual('Sorry cannot reallocate. Person is an occupant of this room', reallocate_again)
