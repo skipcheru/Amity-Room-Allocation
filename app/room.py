@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from person import Fellow, Staff
+from app.person import Fellow, Staff
 
 
 class Room(object):
