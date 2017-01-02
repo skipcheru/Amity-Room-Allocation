@@ -63,7 +63,7 @@ class MyInteractive(cmd.Cmd):
     intro = '\tWelcome to Amity Room Application!\n\n' \
             '\tThe Commands Are Listed Below\n\n' \
             '\t---------------------------------------------\n'\
-            '\tCreate Rooms        : create_room names \n' \
+            '\tCreate Rooms        : create_room <name type>, <name type gender> \n' \
             '\tAdd Person          : add_person <f_name> <l_name> <gender> <type> [<accommodation>] \n' \
             '\tView Room Occupants : print_allocations  [<accommodation>]     \n' \
             '\tView All People     : print_all     \n' \
@@ -76,7 +76,6 @@ class MyInteractive(cmd.Cmd):
             '\tquit                : To Exit\n' \
             '\t---------------------------------------------\n\n'
 
-
     prompt = '(Amity App) '
     file = None
     amity = Amity()
@@ -86,7 +85,6 @@ class MyInteractive(cmd.Cmd):
     @docopt_cmd
     def do_create_room(self, args):
         """Create Rooms. Usage: create_room <name>..."""
-
         names = args['<name>']
         rooms = ' '.join(names)
         self.amity.create_room(rooms.split(','))
@@ -106,7 +104,6 @@ class MyInteractive(cmd.Cmd):
             self.amity.add_person(first_name, last_name, gender, person_type, accomm)
         else:
             self.amity.add_person(first_name, last_name, gender, person_type)
-
 
     @docopt_cmd
     def do_print_room(self, args):
@@ -134,7 +131,7 @@ class MyInteractive(cmd.Cmd):
         """Usage: reallocate_person <person_id> <room_name>"""
 
         person_id = args['<person_id>']
-        room_name  = args['<room_name>']
+        room_name = args['<room_name>']
 
         print(self.amity.reallocate_person(person_id, room_name))
 

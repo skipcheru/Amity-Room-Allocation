@@ -6,6 +6,7 @@ import random
 import string
 import json
 
+
 class Amity(metaclass=Singleton):
     """All app functions are implemented Here."""
 
@@ -85,18 +86,19 @@ class Amity(metaclass=Singleton):
             print('{} These names are invalid '.format(error_list))
 
     # Method to add person to the system and allocate room
-    def add_person(self, first_name, last_name, gender, person_type, accommodation='N'):
+    def add_person(self, first_name, last_name, gender, person_type,
+                   accommodation='N'):
 
-        person_details = [first_name, last_name, gender, person_type, accommodation]
+        person_details = [first_name, last_name, gender, person_type,
+                          accommodation]
 
         if all(details.isalpha() for details in person_details):
 
-            # check if the person exists
             fellow = Fellow(first_name, last_name, gender)
             staff = Staff(first_name, last_name, gender)
-
+            # check if the person exists
             if self.check_names(fellow) or self.check_names(staff):
-                return '{} {} already exists'.format(first_name, last_name)
+                print('{} {} already exists'.format(first_name, last_name))
 
             else:
                 if person_type.lower() == 'fellow':
@@ -129,18 +131,20 @@ class Amity(metaclass=Singleton):
     # print all fellows and staff
     def print_all_people(self):
 
-        print('\nSTAFF\n' + '-'*16)
+        print('\nSTAFF\n' + '-'*16 + '\n   Id \t  Name')
         count = 0
         for staff in self.staffs:
-            for person_id, person in staff.items() :
-                print (count, ' ' + person_id + ' : Name '+  person.first_name.title(), person.last_name.title())
+            for person_id, person in staff.items():
+                print(count, ' ' + person_id + ' : '+person.first_name.title(),
+                      person.last_name.title())
                 count += 1
 
-        print('\nFELLOWS\n' + '-'*16)
+        print('\nFELLOWS\n' + '-'*16 + '\n   Id \t  Name')
 
         for fellow in self.fellows:
-            for person_id, person in fellow.items() :
-                print (count, ' ' + person_id + ' : Name '+  person.first_name.title(), person.last_name.title())
+            for person_id, person in fellow.items():
+                print(count, ' ' + person_id + ' : '+person.first_name.title(),
+                      person.last_name.title())
                 count += 1
 
         print('\n')
@@ -167,7 +171,8 @@ class Amity(metaclass=Singleton):
         elif any(office for office in self.offices if office.is_vacant()):
             for office in self.offices:
                 random_office = random.choice(self.offices)
-                if random_office.is_vacant() and not random_office.is_person_an_occupant(person_type):
+                if (random_office.is_vacant() and not
+                        random_office.is_occupant(person_type)):
                     random_office.add_occupant(person_type)
                     break
         else:
@@ -177,33 +182,38 @@ class Amity(metaclass=Singleton):
         # allocate random livingspace to fellow
         if isinstance(person_type, Fellow) and accommodation == 'Yes':
 
-            if len(self.living_spaces['male']) == 0 and person_type.gender.lower() == 'male':
+            if (len(self.living_spaces['male']) == 0 and
+                    person_type.gender.lower() == 'male'):
                 self.fellows_unallocated_living_space.append(person_type)
                 print('Added to Unallocated livingspaces.')
 
-            elif len(self.living_spaces['female']) == 0 and person_type.gender.lower() == 'female':
+            elif (len(self.living_spaces['female']) == 0 and
+                    person_type.gender.lower() == 'female'):
                 self.fellows_unallocated_living_space.append(person_type)
                 print('Added to Unallocated livingspaces.')
 
-            elif any(living for living in self.living_spaces['male'] if living.is_vacant()):
+            elif (any(living for living in self.living_spaces['male']
+                  if living.is_vacant()) and
+                    any(living for living in self.living_spaces['female']
+                        if living.is_vacant())):
 
                 if person_type.gender.lower() == 'male':
                     for living in self.living_spaces['male']:
                         random_living_male = random.choice(
                             self.living_spaces['male'])
-                        if random_living_male.is_vacant() and not random_living_male.is_fellow_an_occupant(person_type):
+                        if (random_living_male.is_vacant() and not
+                                random_living_male.is_occupant(person_type)):
                             random_living_male.add_occupant(person_type)
                             return 'Allocated Living Space'
                             break
 
-            elif any(living for living in self.living_spaces['female'] if living.is_vacant()):
-
-                if person_type.gender.lower() == 'female':
+                elif person_type.gender.lower() == 'female':
                     for living in self.living_spaces['female']:
                         random_living_female = random.choice(
                             self.living_spaces['female'])
 
-                        if random_living_female.is_vacant() and not random_living_female.is_fellow_an_occupant(person_type):
+                        if (random_living_female.is_vacant() and not
+                                random_living_female.is_occupant(person_type)):
                             random_living_female.add_occupant(person_type)
                             return 'Allocated Living Space'
                             break
@@ -219,8 +229,6 @@ class Amity(metaclass=Singleton):
 
         andelan_id = ''.join(random.choice(chars) for i in range(4))
 
-        #["{0:03}".format(i) for i in range(121)]
-
         # check if the id is unique
         while andelan_id not in self.set_of_ids:
             return andelan_id
@@ -229,13 +237,16 @@ class Amity(metaclass=Singleton):
     def check_room(self, room_name):
         # check if room exits in offices
         is_office = [
-            office for office in self.offices if room_name.lower() in office.name]
+            office for office in self.offices
+            if room_name.lower() in office.name]
 
         is_male_living_space = [
-            living for living in self.living_spaces['male'] if room_name.lower() in living.name]
+            living for living in self.living_spaces['male']
+            if room_name.lower() in living.name]
 
         is_female_living_space = [
-            living for living in self.living_spaces['female'] if room_name.lower() in living.name]
+            living for living in self.living_spaces['female']
+            if room_name.lower() in living.name]
 
         if is_office:
             return 'office', is_office[0]
@@ -273,34 +284,35 @@ class Amity(metaclass=Singleton):
         # check if both params are correct
         if isinstance(person_id, str) and isinstance(room_name, str):
 
-            if self.check_person(person_id.upper()) != False:
+            if self.check_person(person_id.upper()):
                 person_type, person_obj = self.check_person(person_id.upper())
 
-            if self.check_room(room_name) != False:
+            if self.check_room(room_name):
                 room_type, room_obj = self.check_room(room_name)
 
             # check if person and room exists
-            if not self.check_person(person_id.upper()) and not self.check_room(room_name):
+            if (not self.check_person(person_id.upper()) and not
+                    self.check_room(room_name)):
                 return 'Both person and room are not on the system'
 
             elif not self.check_person(person_id.upper()):
-
                 return 'The person is not on the system'
-                # return 'The person is not on the system'
 
             elif not self.check_room(room_name):
                 return 'The room is not on the system'
 
             elif (person_type == 'fellow' and room_type == 'male_living_space'
                     and person_obj.gender == 'female'):
-                return 'Sorry female fellow cannot be reallocated to male livingspace'
+                return 'Sorry female fellow cannot be reallocated\
+                        to male livingspace'
 
             elif (person_type == 'fellow' and room_type == 'female_living_space'
-                  and person_obj.gender == 'male'):
-                    return 'Sorry male fellow cannot be reallocated to female livingspace'
+                    and person_obj.gender == 'male'):
+                    return 'Sorry male fellow cannot be reallocated to\
+                            female livingspace'
 
             elif (person_type == 'staff' and room_type in
-                        ('female_living_space', 'male_living_space')):
+                    ('female_living_space', 'male_living_space')):
 
                     return 'Sorry staff cannot be allocated livingspace'
             else:
@@ -310,18 +322,17 @@ class Amity(metaclass=Singleton):
                             .format(room_name)
 
                 elif person_obj in room_obj.occupants:
-                    return 'Sorry cannot reallocate. Person is an occupant of this room'
+                    return 'Sorry Person is already an occupant of this room'
 
-                if room_obj.is_vacant() and not person_obj in room_obj.occupants:
-                    # get person previous room
-
-                    # check the previous room and the current room if are type same
+                if room_obj.is_vacant() and person_obj not in room_obj.occupants:
+                    # check the previous room and the current room if are same
                     if room_type == 'office':
-                        previous_room = self.check_room_occupants(person_obj, 'office')
-                        # remove the person from previous room
+                        previous_room = self.check_room_occupants(person_obj,
+                                                                  'office')
+                        # remove the person from unallocated
                         if person_obj in self.andelans_unallocated_offices:
                             self.andelans_unallocated_offices.remove(person_obj)
-
+                        # remove the person from previous room
                         if previous_room:
                             previous_room.occupants.remove(person_obj)
                             room_obj.add_occupant(person_obj)
@@ -329,11 +340,11 @@ class Amity(metaclass=Singleton):
                         else:
                             room_obj.add_occupant(person_obj)
 
-
                         return 'Person reallocated successfully'
 
                     elif room_type == 'male_living_space':
-                        previous_room = self.check_room_occupants(person_obj, 'male')
+                        previous_room = self.check_room_occupants(person_obj,
+                                                                  'male')
                         # remove the person from previous room
                         if previous_room:
                             previous_room.occupants.remove(person_obj)
@@ -347,7 +358,8 @@ class Amity(metaclass=Singleton):
                         return 'Person reallocated successfully'
 
                     elif room_type == 'female_living_space':
-                        previous_room = self.check_room_occupants(person_obj, 'female')
+                        previous_room = self.check_room_occupants(person_obj,
+                                                                  'female')
                         # remove the person from previous room
                         if previous_room:
                             previous_room.occupants.remove(person_obj)
@@ -368,11 +380,14 @@ class Amity(metaclass=Singleton):
     def check_room_occupants(self, person_obj, room_type):
         # check for person in all rooms and get room type
 
-        is_office = [office for office in self.offices if person_obj in office.occupants]
+        is_office = [office for office in self.offices if person_obj
+                     in office.occupants]
 
-        is_male = [living for living in self.living_spaces['male'] if person_obj in living.occupants]
+        is_male = [living for living in self.living_spaces['male']
+                   if person_obj in living.occupants]
 
-        is_female = [living for living in self.living_spaces['female'] if person_obj in living.occupants]
+        is_female = [living for living in self.living_spaces['female']
+                     if person_obj in living.occupants]
 
         if room_type == "office":
             if is_office:
@@ -407,12 +422,13 @@ class Amity(metaclass=Singleton):
                     print('\nRoom has no occupants\n')
 
                 else:
-                    print('\n' + room_name.title()+ '\n' + '-'*16)
+                    print('\n' + room_name.title() + '\n' + '-'*16)
                     members = ''
 
                     for occupant in room_obj.occupants:
                         members += ('{} {}, '.format(
                             occupant.first_name, occupant.last_name))
+
                     print(members + '\n')
         else:
             raise TypeError
@@ -427,13 +443,17 @@ class Amity(metaclass=Singleton):
         male_living = '\nMALE LIVING SPACES'
         female_living = '\nFEMALE LIVING SPACES'
 
+        data = (offices + '\n' + self.print_room_members('office') + male_living
+                + '\n' + self.print_room_members('male') + female_living + '\n'
+                + self.print_room_members('female'))
+
         # check if rooms have been added to the system
         if (len(self.offices) == 0 and len(self.living_spaces['female']) == 0
                 and len(self.living_spaces['male']) == 0):
 
             if file_name:
                 text_file = open(file_name + '.txt', 'w+')
-                text_file.write(no_rooms)
+                text_file.write(data)
                 text_file.close()
                 print('\nData saved in {}.txt\n'.format(file_name))
 
@@ -444,28 +464,19 @@ class Amity(metaclass=Singleton):
 
             if file_name:
                 text_file = open(file_name + '.txt', 'w+')
-                text_file.write(offices)
+                text_file.write(data)
                 text_file.close()
                 print('\nData saved in {}.txt\n'.format(file_name))
 
             else:
-                # print all offices
-                print(offices)
-                self.print_room_members('office')
-
-                # print all male living spaces
-                print(male_living)
-                self.print_room_members('male')
-
-                # print all female living spaces
-                print(female_living)
-                self.print_room_members('female')
+                # print all allocations
+                print(data)
 
     # print all room occupants
     def print_room_members(self, room_type):
         self.room_type = room_type
         room_type_list = []
-
+        # Get room type
         if self.room_type == 'office':
             room_type_list = self.offices
 
@@ -480,14 +491,18 @@ class Amity(metaclass=Singleton):
 
         rooms_with_occupants = [room for room in room_type_list]
 
+        response = ''
+        # Get all room occupants details
         for room in rooms_with_occupants:
-            print('\n'+room.name.title())
-            print('-'*15)
-            names = ""
-            for occupant in room.occupants:
-                names += ('{} {}, '.format(occupant.first_name, occupant.last_name))
+            response += '\n' + room.name.title() + '\n' + '-'*15 + '\n'
 
-            print(names)
+            for occupant in room.occupants:
+                response += ('{} {}, '.format(occupant.first_name,
+                             occupant.last_name))
+
+            response += '\n'
+
+        return response + '\n'
 
     # prints all fellows and staffs who are not allocated offices or
     # livingspaces
@@ -496,7 +511,7 @@ class Amity(metaclass=Singleton):
         title_one = 'All Fellows Unallocated LivingSpace\n'
         title_two = '\nAll Andelans Unallocated Office\n'
         andelans = ''
-        deco_1 = '-'*30
+        deco = '-'*30
         fellows = ''
 
         for fellow in self.fellows_unallocated_living_space:
@@ -505,20 +520,16 @@ class Amity(metaclass=Singleton):
         for andelan in self.andelans_unallocated_offices:
             andelans += ('{} {}, '.format(andelan.first_name, andelan.last_name))
 
+        unallocated = ('\n' + title_one + '\n' + deco + '\n' + fellows + '\n' +
+                       title_two + '\n' + deco + '\n' + andelans + '\n')
         # if file_name is passed write to the file and save
-
         if file_name:
             text_file = open(file_name + '.txt', 'w+')
-
-            response = title_one + '\n' + title_one + '\n'
-            response += deco_1 +'\n' + fellows + '\n' + title_two + '\n'
-            response += deco_1 +'\n' + andelans + '\n'
-            text_file.write(reponse)
+            text_file.write(unallocated)
             text_file.close()
 
             print('\nData saved in {}.txt\n'.format(file_name))
 
         else:
             # print all staff and fellows with no office
-            print('\n'+ title_one + deco_1 +'\n' + fellows +
-            '\n'+ title_two + deco_1 +'\n' + andelans +'\n')
+            print(unallocated)
