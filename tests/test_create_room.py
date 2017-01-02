@@ -18,7 +18,7 @@ class TestCreateRoom(unittest.TestCase):
         self.assertEqual(len(self.amity.living_spaces['female']), 1)
         self.assertIsInstance(self.amity.living_spaces['male'][0], LivingSpace)
 
-    # check if an office exists on the system with the same name
+    # check if an office on the system with the same name is created again
     def test_existing_room_not_added(self):
         self.amity.create_room(['shell l female', 'Nania o', 'Nania office'])
         self.amity.create_room(['shell l female'])
