@@ -15,7 +15,7 @@ class Room(object):
     def add_occupant(self, person):
         self.person = person
         # check if room is vacant and person is occupant before adding
-        if not self.is_vacant() and self.is_occupant(self.person):
+        if not self.is_vacant() or self.is_occupant(self.person):
             return False
         # add person to list of occupants
         self.occupants.append(self.person)

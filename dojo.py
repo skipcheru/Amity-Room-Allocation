@@ -23,7 +23,6 @@ Options:
 import sys
 import cmd
 from docopt import docopt, DocoptExit
-from app.amity import Amity
 from app.database import AmityData
 
 
@@ -58,7 +57,6 @@ def docopt_cmd(func):
     fn.__dict__.update(func.__dict__)
     return fn
 
-
 class MyInteractive(cmd.Cmd):
     intro = '\tWelcome to Amity Room Application!\n\n' \
             '\tThe Commands Are Listed Below\n\n' \
@@ -76,10 +74,8 @@ class MyInteractive(cmd.Cmd):
             '\tquit                : To Exit\n' \
             '\t---------------------------------------------\n\n'
 
-    prompt = '(Amity App) '
-    file = None
-    amity = Amity()
-    amity_data = AmityData()
+    prompt = '(Amity App)'
+    a_data = AmityData()
 
     # start commands here
     @docopt_cmd
@@ -87,7 +83,19 @@ class MyInteractive(cmd.Cmd):
         """Create Rooms. Usage: create_room <name>..."""
         names = args['<name>']
         rooms = ' '.join(names)
-        self.amity.create_room(rooms.split(','))
+        # create room
+        for room in rooms.split(','):
+            if len(room.split()) <= 1 or len(room.split()) >= 4:
+                print('{} is invalid'.format(room))
+
+            if len(room.split()) == 2:
+                room_name, room_type = room.split()
+                print(self.a_data.amity.create_room(room_name, room_type))
+
+            elif len(room.split()) == 3:
+                room_name, room_type, living_type = room.split()
+                print(self.a_data.amity.create_room(room_name, room_type, living_type))
+
 
     @docopt_cmd
     def do_add_person(self, args):
@@ -98,33 +106,29 @@ class MyInteractive(cmd.Cmd):
         last_name = args['<last_name>']
         gender = args['<gender>']
         person_type = args['<person_type>']
-        accomm = args['<accommodation>']
+        accomm = args['<accommodation>'] or 'N'
 
-        if accomm:
-            self.amity.add_person(first_name, last_name, gender, person_type, accomm)
-        else:
-            self.amity.add_person(first_name, last_name, gender, person_type)
+        print(self.a_data.amity.add_person(first_name, last_name, gender, person_type, accomm))
 
     @docopt_cmd
     def do_print_room(self, args):
         """Usage: print_room <room_name>"""
-
         room_name = args['<room_name>']
-        self.amity.print_room(room_name)
+        self.a_data.amity.print_room(room_name)
 
     @docopt_cmd
     def do_print_unallocated(self, args):
         """Usage: print_unallocated [<file_name>]"""
         file_name = args['<file_name>']
 
-        self.amity.print_unallocated(file_name)
+        self.a_data.amity.print_unallocated(file_name)
 
     @docopt_cmd
     def do_print_allocations(self, args):
         """Usage: print_allocations [<file_name>]"""
         file_name = args['<file_name>']
 
-        self.amity.print_allocations(file_name)
+        self.a_data.amity.print_allocations(file_name)
 
     @docopt_cmd
     def do_reallocate_person(self, args):
@@ -133,20 +137,20 @@ class MyInteractive(cmd.Cmd):
         person_id = args['<person_id>']
         room_name = args['<room_name>']
 
-        print(self.amity.reallocate_person(person_id, room_name))
+        print(self.a_data.amity.reallocate_person(person_id, room_name))
 
     @docopt_cmd
     def do_print_all(self, args):
         """Usage: print_all """
 
-        self.amity.print_all_people()
+        self.a_data.amity.print_all_people()
 
     @docopt_cmd
     def do_load_people(self, args):
         """Usage: load_people [<file_name>] """
         file_name = args['<file_name>']
 
-        self.amity_data.load_people(file_name)
+        self.a_data.load_people(file_name)
 
     @docopt_cmd
     def do_save_state(self, args):
