@@ -41,21 +41,21 @@ class TestAddPerson(unittest.TestCase):
         self.amity.add_person('sam', 'cheru', 'male', 'fellow', 'N')
         self.amity.add_person('debbie', 'asila', 'female', 'fellow', 'Y')
         self.amity.add_person('carol', 'radul', 'female', 'staff')
-        self.assertEqual(self.fellow, self.amity.offices[0].occupants[0])
-        self.assertIn(self.staff, self.amity.offices[0].occupants)
+        self.assertEqual(self.fellow, self.amity.rooms['office'][0].occupants[0])
+        self.assertIn(self.staff, self.amity.rooms['office'][0].occupants)
 
     # check if fellows are allocated livingspaces
     def test_allocate_fellow_living_space(self):
         self.amity.add_person('sam', 'cheru', 'male', 'fellow', 'Y')
         self.amity.add_person('debbie', 'asila', 'female', 'fellow', 'Y')
         fellow = Fellow('debbie', 'asila', 'female')
-        self.assertEqual(self.fellow, self.amity.living_spaces['male'][0].occupants[0])
-        self.assertEqual(fellow, self.amity.living_spaces['female'][0].occupants[0])
+        self.assertEqual(self.fellow, self.amity.rooms['male'][0].occupants[0])
+        self.assertEqual(fellow, self.amity.rooms['female'][0].occupants[0])
 
     # test if fellow who does not need accommodation are not allocated living rooms
     def test_allocate_office_only(self):
         self.amity.add_person('sam', 'cheru', 'male', 'fellow', 'N')
-        self.assertFalse(self.fellow in self.amity.living_spaces['male'][0].occupants)
+        self.assertFalse(self.fellow in self.amity.rooms['male'][0].occupants)
 
     # check if fellow has been moved to unallocated if no living space
     def test_unallocated_living_space(self):
@@ -93,25 +93,25 @@ class TestCreateRoom(unittest.TestCase):
 
     def test_office_created(self):
         self.amity.create_room('Nania', 'office')
-        self.assertEqual(len(self.amity.offices), 1)
+        self.assertEqual(len(self.amity.rooms['office']), 1)
 
     # check if the living spaces added
     def test_living_space_created(self):
         self.amity.create_room('shell', 'l', 'female')
         self.amity.create_room('java', 'l', 'male')
-        self.assertEqual(len(self.amity.living_spaces['male']), 1)
-        self.assertEqual(len(self.amity.living_spaces['female']), 1)
-        self.assertIsInstance(self.amity.living_spaces['male'][0], LivingSpace)
+        self.assertEqual(len(self.amity.rooms['male']), 1)
+        self.assertEqual(len(self.amity.rooms['female']), 1)
+        self.assertIsInstance(self.amity.rooms['male'][0], LivingSpace)
 
     # check if an office on the system with the same name is created again
     def test_existing_room_not_added(self):
         self.amity.create_room('shell', 'l', 'female')
         name_error = self.amity.create_room('shell', 'l', 'female')
-        self.assertEqual(len(self.amity.living_spaces['female']), 1)
+        self.assertEqual(len(self.amity.rooms['female']), 1)
         self.assertEqual(name_error, 'shell already exists')
 
     # check invalid names for offices and living spaces
-    def test_invalid_names_of_offices_and_living_spaces(self):
+    def test_invalid_names_of_offices_and_rooms(self):
         invalid_name = self.amity.create_room('java', 'h', 'male')
         self.assertEqual(invalid_name, 'Invalid room type')
 
@@ -144,26 +144,26 @@ class TestReallocatePerson(unittest.TestCase):
     # the room to be allocated is living
     def test_reallocate_staff_to_livingspace(self):
         self.amity.staffs.append({'S001': self.staff})
-        self.amity.offices[0].add_occupant(self.staff)
+        self.amity.rooms['office'][0].add_occupant(self.staff)
 
         reallocate_staff = self.amity.reallocate_person('S001', 'Peri')
         error_msg = 'Sorry staff cannot be allocated livingspace'
         self.assertEqual(error_msg, reallocate_staff)
-        self.assertFalse(self.staff in self.amity.living_spaces['male'][0].occupants)
+        self.assertFalse(self.staff in self.amity.rooms['male'][0].occupants)
 
     # check if fellow is reallocated to another livingspace
     def test_reallocte_fellow(self):
-        self.amity.living_spaces['female'][0].add_occupant(self.fellow2)
+        self.amity.rooms['female'][0].add_occupant(self.fellow2)
         self.amity.reallocate_person('F002', 'react')
-        self.assertTrue(self.fellow2 in self.amity.living_spaces['female'][0].occupants)
+        self.assertTrue(self.fellow2 in self.amity.rooms['female'][0].occupants)
 
     # check if staff is reallocated to another office
     def test_reallocte_staff(self):
         self.amity.staffs.append({'S001': self.staff})
-        self.amity.offices[0].add_occupant(self.staff)
+        self.amity.rooms['office'][0].add_occupant(self.staff)
         self.amity.reallocate_person('S001', 'nania')
-        self.assertFalse(self.staff in self.amity.offices[0].occupants)
-        self.assertTrue(self.staff in self.amity.offices[1].occupants)
+        self.assertFalse(self.staff in self.amity.rooms['office'][0].occupants)
+        self.assertTrue(self.staff in self.amity.rooms['office'][1].occupants)
         # check if person is reallocated to same room
         reallocate_again = self.amity.reallocate_person('S001', 'nania')
         self.assertEqual('Sorry Person is already an occupant of this room'
@@ -174,8 +174,8 @@ class TestReallocatePerson(unittest.TestCase):
         # add male and female fellow to system
         self.amity.fellows.append({'F001': self.fellow})
         self.amity.fellows.append({'F002': self.fellow2})
-        print(self.amity.living_spaces['female'][0].name)
-        print(self.amity.living_spaces['male'][0].name)
+        print(self.amity.rooms['female'][0].name)
+        print(self.amity.rooms['male'][0].name)
 
         # reallocate male to female living space and vice versa
         male_error = self.amity.reallocate_person('F002', 'peri')
@@ -187,5 +187,5 @@ class TestReallocatePerson(unittest.TestCase):
         self.assertEqual(male_error, response1)
         self.assertEqual(female_error, response2)
 
-        self.assertFalse(self.fellow in self.amity.living_spaces['female'][0].occupants)
-        self.assertFalse(self.fellow2 in self.amity.living_spaces['male'][0].occupants)
+        self.assertFalse(self.fellow in self.amity.rooms['female'][0].occupants)
+        self.assertFalse(self.fellow2 in self.amity.rooms['male'][0].occupants)
