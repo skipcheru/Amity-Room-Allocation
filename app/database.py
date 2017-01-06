@@ -64,7 +64,7 @@ class AmityData(object):
             self.amity.rooms['male']= pickle.loads(data[6])
             self.amity.rooms['female'] = pickle.loads(data[7])
 
-            print('Data Loaded Successfully', len(self.amity.andelans_unallocated_offices))
+            print('Data Loaded Successfully')
 
     def load_people(self, file_name=None):
         # open file
