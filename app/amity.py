@@ -9,10 +9,8 @@ class Amity():
     """All app functions are implemented Here."""
 
     def __init__(self):
-        self.staffs = []
-        self.fellows = []
-        self.fellows_unallocated_living_space = []
-        self.andelans_unallocated_offices = []
+        self.people = {'fellows': {}, 'staff': {}}
+        self.unallocated = {'office': [], 'living': []}
         self.rooms = {'office': [], 'female': [], 'male': []}
         self.set_of_ids = set()
 
@@ -76,7 +74,7 @@ class Amity():
 
         if person_type.lower() in ('fellow', 'f'):
 
-            self.fellows.append({self.generate_id(): fellow})
+            self.people['fellows'].update({self.generate_id(): fellow})
 
             # allocate  fellow livingspace if he/she needs
             if accommodation.lower() in ('y', 'yes'):
@@ -89,7 +87,7 @@ class Amity():
 
         if person_type.lower() in ('staff', 's'):
 
-            self.staffs.append({self.generate_id(): staff})
+            self.people['staff'].update({self.generate_id(): staff})
             self.allocate(staff, 'No')
 
             return 'Staff Added Successfully'
@@ -97,39 +95,30 @@ class Amity():
     # print all fellows and staff
     def print_all_people(self):
 
-        print('\nSTAFF\n' + '-'*16 + '\n   Id \t  Name')
         count = 0
-        for staff in self.staffs:
-            for person_id, person in staff.items():
-                print(count, ' ' + person_id + ' : '+person.first_name.title(),
+        for key, value in self.people.items():
+            print('\n'+ key +'\n' + '-'*16 + '\n   Id \t  Name')
+
+            for person_id, person in value.items():
+                print(count, ' ' + person_id + ' : '+ person.first_name.title(),
                       person.last_name.title())
+
                 count += 1
-
-        print('\nFELLOWS\n' + '-'*16 + '\n   Id \t  Name')
-
-        for fellow in self.fellows:
-            for person_id, person in fellow.items():
-                print(count, ' ' + person_id + ' : '+person.first_name.title(),
-                      person.last_name.title())
-                count += 1
-
         print('\n')
 
     # check if a person with same names exists
     def check_names(self, person_obj):
 
-        fellows = [item for fellow in self.fellows for item in fellow.values()]
+        person = [item for people in self.people.values() for item in people.values()]
 
-        staffs = [item for staff in self.staffs for item in staff.values()]
-
-        return person_obj in fellows or person_obj in staffs
+        return person_obj in person
 
     # Room allocation method.
     def allocate(self, person, accommodation):
         # allocate random office to both fellow and staff
         if (len(self.rooms['office']) == 0 or all(not office.is_vacant() for office in self.rooms['office'])):
 
-            self.andelans_unallocated_offices.append(person)
+            self.unallocated['office'].append(person)
             print('Added to Unallocated Office.')
 
         if any(office for office in self.rooms['office'] if office.is_vacant()):
@@ -149,7 +138,7 @@ class Amity():
             # add to Unallocated if there is no living space
             if (len(self.rooms[gender]) == 0 or
                 all( not living.is_vacant() for living in self.rooms[gender])):
-                self.fellows_unallocated_living_space.append(person)
+                self.unallocated['living'].append(person)
                 print('Added to Unallocated livingspaces.')
 
             if (any(living for living in self.rooms[gender] if living.is_vacant())):
@@ -185,17 +174,13 @@ class Amity():
     # check if person exists in the system
     def check_person(self, person_id):
 
-        is_staff = [
-            staff[person_id] for staff in self.staffs if person_id in staff]
+        is_person = [(key, value[person_id]) for key, value in self.people.items()
+                     if person_id in value]
 
-        is_fellow = [
-            fellow[person_id] for fellow in self.fellows if person_id in fellow]
+        if is_person:
+            key, person = is_person[0]
+            return key, person
 
-        if is_staff:
-            return 'staff', is_staff[0] if is_staff else False
-
-        if is_fellow:
-            return 'fellow', is_fellow[0] if is_fellow else False
 
     # Realloctes a person from one room to another
     def reallocate_person(self, person_id, room_name):
@@ -239,11 +224,9 @@ class Amity():
             # check the previous room and the current room if are same
             previous_room = self.check_room_occupants(person_obj, room)
             # remove the person from unallocated
-            if person_obj in self.andelans_unallocated_offices and room == 'office':
-                self.andelans_unallocated_offices.remove(person_obj)
+            if person_obj in self.unallocated[room]:
+                self.unallocated[room].remove(person_obj)
 
-            if person_obj in self.fellows_unallocated_living_space and room in ('male', 'female'):
-                self.fellows_unallocated_living_space.remove(person_obj)
             # remove the person from previous room
             if previous_room:
                 previous_room.occupants.remove(person_obj)
@@ -307,21 +290,19 @@ class Amity():
                 text_file.write(data)
                 text_file.close()
                 print('\nData saved in {}.txt\n'.format(file_name))
+                return
 
-            else:
-                print(no_rooms)
+            print(no_rooms)
 
-        else:
+        if file_name:
+            text_file = open(file_name + '.txt', 'w+')
+            text_file.write(data)
+            text_file.close()
+            print('\nData saved in {}.txt\n'.format(file_name))
+            return
 
-            if file_name:
-                text_file = open(file_name + '.txt', 'w+')
-                text_file.write(data)
-                text_file.close()
-                print('\nData saved in {}.txt\n'.format(file_name))
-
-            else:
-                # print all allocations
-                print(data)
+        # print all allocations
+        print(data)
 
     # print all room occupants
     def print_room_members(self, room_type):
@@ -350,12 +331,13 @@ class Amity():
         andelans = ''
         deco = '-'*30
         fellows = ''
+        count = 0
 
-        for fellow in self.fellows_unallocated_living_space:
-            fellows += ('{} {}, '.format(fellow.first_name, fellow.last_name))
+        for person in self.unallocated['office']:
+            andelans += ('{} {}, '.format(person.first_name, person.last_name))
 
-        for andelan in self.andelans_unallocated_offices:
-            andelans += ('{} {}, '.format(andelan.first_name, andelan.last_name))
+        for person in self.unallocated['living']:
+            fellows += ('{} {}, '.format(person.first_name, person.last_name))
 
         unallocated = ('\n' + title_one + '\n' + deco + '\n' + fellows + '\n' +
                        title_two + '\n' + deco + '\n' + andelans + '\n')
@@ -366,7 +348,7 @@ class Amity():
             text_file.close()
 
             print('\nData saved in {}.txt\n'.format(file_name))
+            return
 
-        else:
-            # print all staff and fellows with no office
-            print(unallocated)
+        # print all staff and fellows with no office
+        print(unallocated)

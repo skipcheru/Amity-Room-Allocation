@@ -18,28 +18,26 @@ class TestAddPerson(unittest.TestCase):
     # check if the person added to the system is a fellow
     def test_person_added_is_type_fellow(self):
         self.amity.add_person('sam', 'cheru', 'male', 'fellow', 'N')
-        self.amity.add_person('debbie', 'asila', 'female', 'fellow', 'Y')
-        fellow = list(self.amity.fellows[0].values())
+        fellow = list(self.amity.people['fellows'].values())
         self.assertEqual(self.fellow, fellow[0])
 
     # check if the person added to the system is a staff
     def test_person_added_is_type_staff(self):
         self.amity.add_person('carol', 'radul', 'female', 'staff')
-        staff = list(self.amity.staffs[0].values())
+        staff = list(self.amity.people['staff'].values())
         self.assertEqual(self.staff, staff[0])
-        self.assertEqual(len(self.amity.staffs), 1)
+        self.assertEqual(len(self.amity.people['staff']), 1)
 
     # test if same person is not added twice and error is raised
     def test_person_added_is_not_added_twice(self):
         self.amity.add_person('carol', 'radul', 'female', 'staff')
         error = self.amity.add_person('carol', 'radul', 'female', 'staff')
         self.assertEqual(error, 'carol radul already exists')
-        self.assertEqual(len(self.amity.staffs), 1)
+        self.assertEqual(len(self.amity.people['staff']), 1)
 
     # check if the person is allocated a office
     def test_allocate_office_to_fellow_and_staff(self):
         self.amity.add_person('sam', 'cheru', 'male', 'fellow', 'N')
-        self.amity.add_person('debbie', 'asila', 'female', 'fellow', 'Y')
         self.amity.add_person('carol', 'radul', 'female', 'staff')
         self.assertEqual(self.fellow, self.amity.rooms['office'][0].occupants[0])
         self.assertIn(self.staff, self.amity.rooms['office'][0].occupants)
@@ -66,7 +64,7 @@ class TestAddPerson(unittest.TestCase):
         self.amity.add_person('nchoe', 'soila', 'female', 'fellow', 'Y')
 
         fellow = Fellow('nchoe', 'soila', 'female')
-        self.assertTrue(fellow in self.amity.fellows_unallocated_living_space)
+        self.assertTrue(fellow in self.amity.unallocated['living'])
 
     # check if fellow or staff has been moved to unallocated if no office
     def test_unallocated_offices(self):
@@ -82,9 +80,9 @@ class TestAddPerson(unittest.TestCase):
         fellow = Fellow('viola', 'jeruto', 'female')
         staff = Staff('digo', 'halikan', 'male')
 
-        self.assertTrue(len(self.amity.andelans_unallocated_offices), 2)
-        self.assertTrue(fellow in self.amity.andelans_unallocated_offices)
-        self.assertTrue(staff in self.amity.andelans_unallocated_offices)
+        self.assertTrue(len(self.amity.unallocated['office']), 2)
+        self.assertTrue(fellow in self.amity.unallocated['office'])
+        self.assertTrue(staff in self.amity.unallocated['office'])
 
 class TestCreateRoom(unittest.TestCase):
     """Test Create Rooms."""
@@ -136,14 +134,14 @@ class TestReallocatePerson(unittest.TestCase):
     # check if error raised if the room doesn't exist in the system.
     def test_reallocate_unknown_room(self):
 
-        self.amity.fellows.append({'F001': self.fellow})
+        self.amity.people['fellows'].update({'F001': self.fellow})
         unknown_room = self.amity.reallocate_person('F001', 'room')
         self.assertEqual('The room is not on the system', unknown_room)
 
     # check if error is raised if person is staff and
     # the room to be allocated is living
     def test_reallocate_staff_to_livingspace(self):
-        self.amity.staffs.append({'S001': self.staff})
+        self.amity.people['staff'].update({'S001': self.staff})
         self.amity.rooms['office'][0].add_occupant(self.staff)
 
         reallocate_staff = self.amity.reallocate_person('S001', 'Peri')
@@ -159,7 +157,7 @@ class TestReallocatePerson(unittest.TestCase):
 
     # check if staff is reallocated to another office
     def test_reallocte_staff(self):
-        self.amity.staffs.append({'S001': self.staff})
+        self.amity.people['staff'].update({'S001': self.staff})
         self.amity.rooms['office'][0].add_occupant(self.staff)
         self.amity.reallocate_person('S001', 'nania')
         self.assertFalse(self.staff in self.amity.rooms['office'][0].occupants)
@@ -172,8 +170,8 @@ class TestReallocatePerson(unittest.TestCase):
     # check if the male fellow is not reallocated to female living_space and vice versa
     def test_reallocte_male_and_female_fellows(self):
         # add male and female fellow to system
-        self.amity.fellows.append({'F001': self.fellow})
-        self.amity.fellows.append({'F002': self.fellow2})
+        self.amity.people['fellows'].update({'F001': self.fellow})
+        self.amity.people['fellows'].update({'F002': self.fellow2})
         print(self.amity.rooms['female'][0].name)
         print(self.amity.rooms['male'][0].name)
 

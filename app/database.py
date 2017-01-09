@@ -20,27 +20,20 @@ class AmityData(object):
     def create_db(self):
 
         all_data = ('CREATE TABLE IF NOT EXISTS all_people(id INTEGER PRIMARY KEY,\
-                    fellows TEXT, staffs TEXT, unallocated_living TEXT,\
-                    unallocated_offices TEXT, offices TEXT, male_living TEXT,\
-                    female_living TEXT);')
+                    people TEXT, unallocated TEXT, rooms TEXT);')
 
         self.cursor.execute(all_data)
 
     def save_state(self):
 
-        fellows= pickle.dumps(self.amity.fellows)
-        staffs = pickle.dumps(self.amity.staffs)
-        unallocated_living = pickle.dumps(self.amity.fellows_unallocated_living_space)
-        unallocated_offices = pickle.dumps(self.amity.andelans_unallocated_offices)
-        offices = pickle.dumps(self.amity.rooms['office'])
-        male_living = pickle.dumps(self.amity.rooms['male'])
-        female_living = pickle.dumps(self.amity.rooms['female'])
+        people = pickle.dumps(self.amity.people)
+        unallocated = pickle.dumps(self.amity.unallocated)
+        rooms = pickle.dumps(self.amity.rooms)
 
-        query = 'INSERT OR REPLACE INTO all_people (id, fellows, staffs, unallocated_living,\
-                    unallocated_offices, offices, male_living, female_living) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+        query = 'INSERT OR REPLACE INTO all_people (id, people, unallocated,\
+                    rooms) VALUES (?, ?, ?, ?)'
 
-        self.cursor.execute(query, (1, fellows, staffs, unallocated_living,
-                        unallocated_offices, offices, male_living, female_living))
+        self.cursor.execute(query, (1, people, unallocated, rooms))
         self.conn.commit()
 
         print('Data Saved Successfully in {}.db'.format(self.database))
@@ -55,16 +48,11 @@ class AmityData(object):
         if not data:
             print("\nNo Data available.\n")
 
-        else:
-            self.amity.fellows = pickle.loads(data[1])
-            self.amity.staffs = pickle.loads(data[2])
-            self.amity.fellows_unallocated_living_space  = pickle.loads(data[3])
-            self.amity.andelans_unallocated_offices  = pickle.loads(data[4])
-            self.amity.rooms['office'] = pickle.loads(data[5])
-            self.amity.rooms['male']= pickle.loads(data[6])
-            self.amity.rooms['female'] = pickle.loads(data[7])
+        self.amity.people = pickle.loads(data[1])
+        self.amity.unallocated = pickle.loads(data[2])
+        self.amity.rooms  = pickle.loads(data[3])
 
-            print('Data Loaded Successfully')
+        print('Data Loaded Successfully')
 
     def load_people(self, file_name=None):
         # open file
