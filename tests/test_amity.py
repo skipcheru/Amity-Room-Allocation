@@ -55,34 +55,40 @@ class TestAddPerson(unittest.TestCase):
         self.amity.add_person('sam', 'cheru', 'male', 'fellow', 'N')
         self.assertFalse(self.fellow in self.amity.rooms['male'][0].occupants)
 
-    # check if fellow has been moved to unallocated if no living space
-    def test_unallocated_living_space(self):
-        self.amity.add_person('amina', 'abdi', 'female', 'fellow', 'Y')
-        self.amity.add_person('chess', 'nyambura', 'female', 'fellow', 'Y')
-        self.amity.add_person('njeri', 'thome', 'female', 'fellow', 'Y')
-        self.amity.add_person('viola', 'jeruto', 'female', 'fellow', 'Y')
-        self.amity.add_person('nchoe', 'soila', 'female', 'fellow', 'Y')
+    # check if person has been moved to unallocated if no room
+    def test_unallocated_if_no_room(self):
+        amity = Amity()
+        amity.add_person('nchoe', 'soila', 'female', 'fellow', 'y')
+        amity.add_person('viola', 'jeruto', 'female', 'staff')
 
-        fellow = Fellow('nchoe', 'soila', 'female')
-        self.assertTrue(fellow in self.amity.unallocated['living'])
+        self.assertTrue(len(amity.unallocated['office']), 2)
+        self.assertTrue(len(amity.unallocated['living']), 1)
 
-    # check if fellow or staff has been moved to unallocated if no office
-    def test_unallocated_offices(self):
-        self.amity.add_person('amina', 'abdi', 'female', 'fellow', 'Y')
-        self.amity.add_person('chess', 'nyambura', 'female', 'fellow')
-        self.amity.add_person('njeri', 'thome', 'female', 'fellow', 'Y')
-        self.amity.add_person('thumbi', 'njoroge', 'male', 'fellow')
-        self.amity.add_person('mercy', 'adunga', 'female', 'staff')
-        self.amity.add_person('nchoe', 'soila', 'female', 'fellow', 'Y')
-        self.amity.add_person('viola', 'jeruto', 'female', 'fellow')
-        self.amity.add_person('digo', 'halikan', 'male', 'staff')
+        self.assertEqual('nchoe', amity.unallocated['living'][0].first_name)
+        self.assertEqual('viola', amity.unallocated['office'][1].first_name)
 
-        fellow = Fellow('viola', 'jeruto', 'female')
-        staff = Staff('digo', 'halikan', 'male')
+    # check if fellow has been moved to unallocated if all rooms are full
+    def test_unallocated_if_rooms_are_full(self):
+        from app.database import AmityData
 
-        self.assertTrue(len(self.amity.unallocated['office']), 2)
-        self.assertTrue(fellow in self.amity.unallocated['office'])
-        self.assertTrue(staff in self.amity.unallocated['office'])
+        amity_data = AmityData()
+        amity = amity_data.amity
+
+        amity.create_room('oculus', 'office')
+        amity.create_room('Java', 'l', 'male')
+        amity.create_room('React', 'l', 'female')
+        #load people from txt file
+        amity_data.load_people()
+
+        amity.add_person('nchoe', 'soila', 'female', 'fellow', 'y')
+        amity.add_person('viola', 'jeruto', 'female', 'staff')
+
+         # assert the list of unallocated office  is 6 and of living is 1
+        self.assertTrue(len(amity.unallocated['office']), 6)
+        self.assertIn(Fellow('nchoe', 'soila', 'female'), amity.unallocated['office'])
+        self.assertTrue(len(amity.unallocated['living']), 1)
+        self.assertIn(Fellow('nchoe', 'soila', 'female'), amity.unallocated['living'])
+
 
 class TestCreateRoom(unittest.TestCase):
     """Test Create Rooms."""
@@ -101,7 +107,7 @@ class TestCreateRoom(unittest.TestCase):
         self.assertEqual(len(self.amity.rooms['female']), 1)
         self.assertIsInstance(self.amity.rooms['male'][0], LivingSpace)
 
-    # check if an office on the system with the same name is created again
+    # check if an office on the system with the same name is not created again
     def test_existing_room_not_added(self):
         self.amity.create_room('shell', 'l', 'female')
         name_error = self.amity.create_room('shell', 'l', 'female')
@@ -109,7 +115,7 @@ class TestCreateRoom(unittest.TestCase):
         self.assertEqual(name_error, 'shell already exists')
 
     # check invalid names for offices and living spaces
-    def test_invalid_names_of_offices_and_rooms(self):
+    def test_invalid_names_of_rooms(self):
         invalid_name = self.amity.create_room('java', 'h', 'male')
         self.assertEqual(invalid_name, 'Invalid room type')
 
@@ -132,7 +138,7 @@ class TestReallocatePerson(unittest.TestCase):
         self.assertEqual(unknown_person, 'The person is not on the system')
 
     # check if error raised if the room doesn't exist in the system.
-    def test_reallocate_unknown_room(self):
+    def test_reallocate_to_unknown_room(self):
 
         self.amity.people['fellows'].update({'F001': self.fellow})
         unknown_room = self.amity.reallocate_person('F001', 'room')
@@ -172,8 +178,6 @@ class TestReallocatePerson(unittest.TestCase):
         # add male and female fellow to system
         self.amity.people['fellows'].update({'F001': self.fellow})
         self.amity.people['fellows'].update({'F002': self.fellow2})
-        print(self.amity.rooms['female'][0].name)
-        print(self.amity.rooms['male'][0].name)
 
         # reallocate male to female living space and vice versa
         male_error = self.amity.reallocate_person('F002', 'peri')

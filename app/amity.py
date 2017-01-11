@@ -274,8 +274,7 @@ class Amity():
 
         no_rooms = '\nCurrently there are no Rooms\n'
         empty_rooms = '\nAll rooms are empty\n '
-        offices = '\nOFFICES'
-        male_living = '\nMALE LIVING SPACES'
+        offices, male_living = '\nOFFICES', '\nMALE LIVING SPACES'
         female_living = '\nFEMALE LIVING SPACES'
 
         data = (offices + '\n' + self.print_room_members('office') + male_living
@@ -328,10 +327,7 @@ class Amity():
 
         title_one = 'All Fellows Unallocated LivingSpace\n'
         title_two = '\nAll Andelans Unallocated Office\n'
-        andelans = ''
-        deco = '-'*30
-        fellows = ''
-        count = 0
+        andelans, fellows, count, deco = '', '', 0, '-'*30
 
         for person in self.unallocated['office']:
             andelans += ('{} {}, '.format(person.first_name, person.last_name))
