@@ -47,6 +47,7 @@ class AmityData(object):
 
         if not data:
             print("\nNo Data available.\n")
+            return
 
         self.amity.people = pickle.loads(data[1])
         self.amity.unallocated = pickle.loads(data[2])
